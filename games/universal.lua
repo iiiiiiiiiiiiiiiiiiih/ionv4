@@ -14,7 +14,7 @@ end
 local function downloadFile(path, func)
 	if not isfile(path) then
 		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/poopparty/poopparty/'..readfile('newvape/profiles/commit.txt')..'/'..select(1, path:gsub('newvape/', '')), true)
+			return game:HttpGet('https://raw.githubusercontent.com/LionKing123412/LionV5/'..readfile('LionV5/profiles/commit.txt')..'/'..select(1, path:gsub('LionV5/', '')), true)
 		end)
 		if not suc or res == '404: Not Found' then
 			error(res)
@@ -570,14 +570,16 @@ run(function()
 			local commit = subbed:find('currentOid')
 			commit = commit and subbed:sub(commit + 13, commit + 52) or nil
 			commit = commit and #commit == 40 and commit or 'main'
-			whitelist.textdata = game:HttpGet('https://raw.githubusercontent.com/poopparty/whitelistcheck/'..commit..'/PlayerWhitelist.json', true)
+			whitelist.textdata = game:HttpGet('https://raw.githubusercontent.com/LionKing123412/LionV5/'..commit..'/PlayerWhitelist.json', true)
+
 		end)
 		if not suc or not hash or not whitelist.get then return true end
 		whitelist.loaded = true
 
 		if not first or whitelist.textdata ~= whitelist.olddata then
 			if not first then
-				whitelist.olddata = isfile('newvape/profiles/whitelist.json') and readfile('newvape/profiles/whitelist.json') or nil
+				whitelist.olddata = isfile('LionV5/profiles/whitelist.json') and readfile('LionV5/profiles/whitelist.json') or nil
+
 			end
 
 			local suc, res = pcall(function()
@@ -624,7 +626,7 @@ run(function()
 				end
 				whitelist.olddata = whitelist.textdata
 				pcall(function()
-					writefile('newvape/profiles/whitelist.json', whitelist.textdata)
+					writefile('LionV5/profiles/whitelist.json', whitelist.textdata)
 				end)
 			end
 
