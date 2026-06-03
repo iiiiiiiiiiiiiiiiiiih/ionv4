@@ -236,7 +236,7 @@ task.wait(0.1)
 
 do
 	local _req = (syn and syn.request) or (http_request and function(t) return http_request(t) end) or request or function() return {Body='{"tier":0}'} end
-	local _liveUrl = 'https://purpose-documents-carbon-closed.trycloudflare.com/whitelist'
+	local _liveUrl = 'https://lionv5-whitelist.bbgamingthe11.workers.dev'
 	local function _getUrl()
 		return _liveUrl
 	end
