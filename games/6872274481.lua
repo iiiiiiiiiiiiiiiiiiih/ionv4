@@ -15641,6 +15641,22 @@ run(function()
 		return cachedTeammates[userId] == true
 	end
 
+	local function getExposedFaceCount(block)
+    local checkDirs = {
+        Vector3.new(3,0,0), Vector3.new(-3,0,0),
+        Vector3.new(0,3,0), Vector3.new(0,-3,0),
+        Vector3.new(0,0,3), Vector3.new(0,0,-3)
+    }
+    local exposed = 0
+    for _, dir in ipairs(checkDirs) do
+        if not getPlacedBlock(block.Position + dir) then
+            exposed = exposed + 1
+        end
+    end
+    return exposed
+end
+
+
 	local function passesChecks(v)
 		local placerTier = getPlacerTier(v)
 		local myTier = getAccountTier(lplr)
@@ -15971,28 +15987,39 @@ run(function()
 						local best, bestDist = nil, math.huge
 						local _blockPosArg = {}
 						local function eval(tab, skip)
-							if not tab then return end
-							for _, v in tab do
-								if not v or not v.Parent then continue end
-								local dist = (v.Position - localPosition).Magnitude
-								if dist >= Range.Value or dist >= bestDist then continue end
-								if not skip and v.Name ~= 'bed' then
-									if not cachedIsBreakable(v) then continue end
-								end
-								if not passesChecks(v) then continue end
-								if BreakerAngle and BreakerAngle.Value < 360 then
-									local hrp = entitylib.character and entitylib.character.RootPart
-									if hrp then
-										local toBlock = (v.Position - hrp.Position).Unit
-										local dot = hrp.CFrame.LookVector:Dot(toBlock)
-										local angleToBlock = math.deg(math.acos(math.clamp(dot, -1, 1)))
-										if angleToBlock > BreakerAngle.Value / 2 then continue end
-									end
-								end
-								best = v
-								bestDist = dist
-							end
-						end
+    if not tab then return end
+    for _, v in tab do
+        if not v or not v.Parent then continue end
+        local dist = (v.Position - localPosition).Magnitude
+        if dist >= Range.Value or dist >= bestDist then continue end
+        if not skip and v.Name ~= 'bed' then
+            if not cachedIsBreakable(v) then continue end
+        end
+        if not passesChecks(v) then continue end
+        if BreakerAngle and BreakerAngle.Value < 360 then
+            local hrp = entitylib.character and entitylib.character.RootPart
+            if hrp then
+                local toBlock = (v.Position - hrp.Position).Unit
+                local dot = hrp.CFrame.LookVector:Dot(toBlock)
+                local angleToBlock = math.deg(math.acos(math.clamp(dot, -1, 1)))
+                if angleToBlock > BreakerAngle.Value / 2 then continue end
+            end
+        end
+        if OuterFirst and OuterFirst.Enabled then
+            local exposed = getExposedFaceCount(v)
+            if exposed == 0 then continue end
+            local score = -(exposed * 1000) + dist
+            local bestScore = best and (-(getExposedFaceCount(best) * 1000) + bestDist) or math.huge
+            if score < bestScore then
+                best = v
+                bestDist = dist
+            end
+        else
+            best = v
+            bestDist = dist
+        end
+    end
+end
 						eval(Bed.Enabled and beds, true)
 						if not best then
 							eval(LuckyBlock.Enabled and luckyblock, true)
@@ -16155,6 +16182,11 @@ run(function()
 		Name = 'Break Closest',
 		Default = false,
 		Tooltip = 'Prioritizes breaking blocks closest to your character instead of the optimal path'
+	})
+	OuterFirst = Breaker:CreateToggle({
+    Name = 'Outer First',
+    Default = false,
+    Tooltip = 'Prioritizes breaking exposed outer blocks before inner ones'
 	})
 	ShowPath = Breaker:CreateToggle({
 		Name = 'Show Path',
