@@ -15748,15 +15748,37 @@ end
 
 	local function doBreakDirect(block)
 		if not block or not block.Parent then return end
+		if lplr:GetAttribute('DenyBlockBreak') or not entitylib.isAlive then return end
 		local blockPos = bedwars.BlockController:getBlockPosition(block.Position)
+		-- auto tool switch
+		local _blockMeta = bedwars.ItemMeta[block.Name]
+		if _blockMeta and _blockMeta.block then
+			local breakType = _blockMeta.block.breakType
+			local tool = store.tools[breakType]
+			if tool then
+				if AutoTool.Enabled and LimitItem.Enabled then
+					local found = false
+					for i, v in store.inventory.hotbar do
+						if v.item and v.item.tool == tool.tool and i ~= (store.inventory.hotbarSlot + 1) then
+							hotbarSwitch(i - 1)
+							found = true
+							break
+						end
+					end
+					if not found then switchItem(tool.tool) end
+				else
+					switchItem(tool.tool)
+				end
+			end
+		end
 		pcall(function()
 			bedwars.ClientDamageBlock:Get('DamageBlock'):CallServerAsync({
 				blockRef = {blockPosition = blockPos},
-				hitPosition = block.Position,
+				hitPosition = blockPos * 3,
 				hitNormal = Vector3.FromNormalId(Enum.NormalId.Top)
 			})
 		end)
-		task.wait(BreakSpeed.Value)
+		task.wait(InstantBreak.Enabled and (store.damageBlockFail > tick() and 4.5 or 0) or BreakSpeed.Value)
 	end
 
 	local function findPathBlock(targetPos, playerPos)
@@ -16037,11 +16059,7 @@ end
 					
 						if best then
 							if not MouseDown or not MouseDown.Enabled or inputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-								if BreakClosest and BreakClosest.Enabled then
-									doBreakDirect(best)
-								else
-									doBreak(best, false)
-								end
+								doBreak(best, false)
 								continue
 							end
 						end
