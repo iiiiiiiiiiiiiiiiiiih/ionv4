@@ -15748,37 +15748,15 @@ end
 
 	local function doBreakDirect(block)
 		if not block or not block.Parent then return end
-		if lplr:GetAttribute('DenyBlockBreak') or not entitylib.isAlive then return end
 		local blockPos = bedwars.BlockController:getBlockPosition(block.Position)
-		-- auto tool switch
-		local _blockMeta = bedwars.ItemMeta[block.Name]
-		if _blockMeta and _blockMeta.block then
-			local breakType = _blockMeta.block.breakType
-			local tool = store.tools[breakType]
-			if tool then
-				if AutoTool.Enabled and LimitItem.Enabled then
-					local found = false
-					for i, v in store.inventory.hotbar do
-						if v.item and v.item.tool == tool.tool and i ~= (store.inventory.hotbarSlot + 1) then
-							hotbarSwitch(i - 1)
-							found = true
-							break
-						end
-					end
-					if not found then switchItem(tool.tool) end
-				else
-					switchItem(tool.tool)
-				end
-			end
-		end
 		pcall(function()
 			bedwars.ClientDamageBlock:Get('DamageBlock'):CallServerAsync({
 				blockRef = {blockPosition = blockPos},
-				hitPosition = blockPos * 3,
+				hitPosition = block.Position,
 				hitNormal = Vector3.FromNormalId(Enum.NormalId.Top)
 			})
 		end)
-		task.wait(InstantBreak.Enabled and (store.damageBlockFail > tick() and 4.5 or 0) or BreakSpeed.Value)
+		task.wait(BreakSpeed.Value)
 	end
 
 	local function findPathBlock(targetPos, playerPos)
@@ -16042,18 +16020,22 @@ end
         end
     end
 end
-						eval(Bed.Enabled and beds, true)
-						if not best then
-							eval(LuckyBlock.Enabled and luckyblock, true)
-							eval(IronOre.Enabled and ironores, true)
-							eval(Tesla and Tesla.Enabled and trackedSpecial.tesla_trap, true)
-							eval(Snow and Snow.Enabled and trackedSpecial.snow_pile, true)
-							eval(Hive and Hive.Enabled and trackedSpecial.beehive)
-							eval(Pinata and Pinata.Enabled and trackedSpecial.pinata, true)
-							if Crops and Crops.Enabled then
-								eval(trackedSpecial.carrot, true)
-								eval(trackedSpecial.melon, true)
-								eval(trackedSpecial.pumpkin, true)
+						if BreakClosest and BreakClosest.Enabled then
+							eval(store.blocks, false)
+						else
+							eval(Bed.Enabled and beds, true)
+							if not best then
+								eval(LuckyBlock.Enabled and luckyblock, true)
+								eval(IronOre.Enabled and ironores, true)
+								eval(Tesla and Tesla.Enabled and trackedSpecial.tesla_trap, true)
+								eval(Snow and Snow.Enabled and trackedSpecial.snow_pile, true)
+								eval(Hive and Hive.Enabled and trackedSpecial.beehive)
+								eval(Pinata and Pinata.Enabled and trackedSpecial.pinata, true)
+								if Crops and Crops.Enabled then
+									eval(trackedSpecial.carrot, true)
+									eval(trackedSpecial.melon, true)
+									eval(trackedSpecial.pumpkin, true)
+								end
 							end
 						end
 					
