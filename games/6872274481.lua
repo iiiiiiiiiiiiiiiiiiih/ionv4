@@ -16037,7 +16037,11 @@ end
 					
 						if best then
 							if not MouseDown or not MouseDown.Enabled or inputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-								doBreak(best, false)
+								if BreakClosest and BreakClosest.Enabled then
+									doBreakDirect(best)
+								else
+									doBreak(best, false)
+								end
 								continue
 							end
 						end
