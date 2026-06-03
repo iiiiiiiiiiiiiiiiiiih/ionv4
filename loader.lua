@@ -10,7 +10,7 @@ end
 local function downloadFile(path, func)
 	if not isfile(path) then
 		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/LionKing123412/LionV5/'..readfile('newvape/profiles/commit.txt')..'/'..select(1, path:gsub('newvape/', '')), true)
+			return game:HttpGet('https://raw.githubusercontent.com/LionKing123412/LionV5/'..readfile('LionV5/profiles/commit.txt')..'/'..select(1, path:gsub('LionV5/', '')), true)
 		end)
 		if not suc or res == '404: Not Found' then
 			error(res)
@@ -31,7 +31,7 @@ local function wipeFolder(path)
 		end
 	end
 end
-for _, folder in {'newvape', 'newvape/games', 'newvape/profiles', 'newvape/assets', 'newvape/libraries', 'newvape/guis'} do
+for _, folder in {'LionV5', 'LionV5/games', 'LionV5/profiles', 'LionV5/assets', 'LionV5/libraries', 'LionV5/guis'} do
 	if not isfolder(folder) then
 		makefolder(folder)
 	end
@@ -47,14 +47,14 @@ if not shared.VapeDeveloper then
 			commit = h
 		end
 	end
-	if commit == 'main' or (isfile('newvape/profiles/commit.txt') and readfile('newvape/profiles/commit.txt') or '') ~= commit then
-		wipeFolder('newvape')
-		wipeFolder('newvape/games')
-		wipeFolder('newvape/guis')
-		wipeFolder('newvape/libraries')
+	if commit == 'main' or (isfile('LionV5/profiles/commit.txt') and readfile('LionV5/profiles/commit.txt') or '') ~= commit then
+		wipeFolder('LionV5')
+		wipeFolder('LionV5/games')
+		wipeFolder('LionV5/guis')
+		wipeFolder('LionV5/libraries')
 	end
-	writefile('newvape/profiles/commit.txt', commit)
+	writefile('LionV5/profiles/commit.txt', commit)
 end
-return loadstring(downloadFile('newvape/main.lua'), 'main')({
+return loadstring(downloadFile('LionV5/main.lua'), 'main')({
     Username = shared.ValidatedUsername
 })
