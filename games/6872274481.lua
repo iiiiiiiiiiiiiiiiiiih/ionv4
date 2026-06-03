@@ -16037,25 +16037,7 @@ end
 					
 						if best then
 							if not MouseDown or not MouseDown.Enabled or inputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-								if BreakClosest and BreakClosest.Enabled then
-									local underBlock = getPlacedBlock(roundPos(localPosition - Vector3.new(0, 3, 0)))
-									if underBlock and underBlock ~= best and passesChecks(underBlock) then
-										local bpos = bedwars.BlockController:getBlockPosition(underBlock.Position)
-										local ok, canBreak = pcall(bedwars.BlockController.isBlockBreakable, bedwars.BlockController, {blockPosition = bpos}, lplr)
-										if ok and canBreak then
-											doBreak(underBlock, true)
-											continue
-										end
-									end
-									local pathBlock = findPathBlock(best.Position, localPosition)
-									if pathBlock then
-										doBreak(pathBlock, true)
-									else
-										doBreak(best, false)
-									end
-								else
-									doBreak(best, false)
-								end
+								doBreak(best, false)
 								continue
 							end
 						end
