@@ -8889,6 +8889,15 @@ run(function()
                             local sword = getSword()
                             if sword then
                                 bedwars.SwordController:swingSwordAtMouse()
+                                -- Press W forward for 0.2 seconds after swing
+                                local uis = game:GetService("UserInputService")
+                                local inputObject = {
+                                    KeyCode = Enum.KeyCode.W,
+                                    UserInputType = Enum.UserInputType.Keyboard
+                                }
+                                uis:simulateKeyDown(Enum.KeyCode.W)
+                                task.wait(0.2)
+                                uis:simulateKeyUp(Enum.KeyCode.W)
                             end
                         end
                         if matchstats == 2 then
@@ -8897,14 +8906,14 @@ run(function()
                                 :WaitForChild("joinQueue")
                             queupath:FireServer({ ["queueType"] = "bedwars_duels " })
                         end
-                        task.wait(1)
+                        task.wait(10) -- Changed from 1 to 10 seconds
                     end
                 end))
             end
         end,
         Tooltip = "AFK farm levels automatically"
     })
-end) 
+end)
 
 																																																																																						
 																																																																																					
