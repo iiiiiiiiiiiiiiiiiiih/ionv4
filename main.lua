@@ -2,8 +2,6 @@ local j1l1jil1i=Path2DControlPoint.new(UDim2.new(0,0,0,0))
 repeat task.wait() until game:IsLoaded()
 if shared.vape then shared.vape:Uninject() end
 
-
-
 if identifyexecutor then
 	if table.find({'Wave', 'Seliware', 'Volt'}, ({identifyexecutor()})[1]) then
 		getgenv().setthreadidentity = nil
@@ -72,7 +70,7 @@ local function downloadFile(path, func)
 		local success = false
 		for attempt = 1, 3 do
 			local suc, result = pcall(function()
-				return game:HttpGet('https://raw.githubusercontent.com/LionKing123412/LionV5/' .. readfile('newvape/profiles/commit.txt') .. '/' .. select(1, path:gsub('newvape/', '')), true)
+				return game:HttpGet('https://raw.githubusercontent.com/LionKing123412/LionV5/' .. readfile('LionV5/profiles/commit.txt') .. '/' .. select(1, path:gsub('LionV5/', '')), true)
 			end)
 			if suc and result ~= '404: Not Found' then
 				res = result
@@ -93,18 +91,18 @@ local function downloadFile(path, func)
 end
 
 local function migrateProfiles()
-	if isfile('newvape/profiles/migrated_placeid.txt') then return end
+	if isfile('LionV5/profiles/migrated_placeid.txt') then return end
 
     local oldId = tostring(game.GameId)
     local newId = tostring(game.PlaceId)
 
 	if oldId == newId then
-		pcall(writefile, 'newvape/profiles/migrated_placeid.txt', 'done')
+		pcall(writefile, 'LionV5/profiles/migrated_placeid.txt', 'done')
 		return
 	end
 
 	local suffix = oldId .. '.txt'
-	for _, path in ipairs(listfiles('newvape/profiles')) do
+	for _, path in ipairs(listfiles('LionV5/profiles')) do
 		local name = path:gsub('\\', '/')
 		if name:sub(-#suffix) == suffix then
 			local newPath = name:sub(1, -#suffix - 1) .. newId .. '.txt'
@@ -114,8 +112,8 @@ local function migrateProfiles()
 		end
 	end
 
-	if isfolder('newvape/profiles/premade') then
-		for _, path in ipairs(listfiles('newvape/profiles/premade')) do
+	if isfolder('LionV5/profiles/premade') then
+		for _, path in ipairs(listfiles('LionV5/profiles/premade')) do
 			local name = path:gsub('\\', '/')
 			if name:sub(-#suffix) == suffix then
 				local newPath = name:sub(1, -#suffix - 1) .. newId .. '.txt'
@@ -126,7 +124,7 @@ local function migrateProfiles()
 		end
 	end
 
-	pcall(writefile, 'newvape/profiles/migrated_placeid.txt', 'done')
+	pcall(writefile, 'LionV5/profiles/migrated_placeid.txt', 'done')
 end
 
 pcall(migrateProfiles)
@@ -150,7 +148,7 @@ local function finishLoading()
 		if (not teleportedServers) and (not shared.VapeIndependent) then
 			teleportedServers = true
 			local teleportScript = [[
-				loadstring(game:HttpGet('https://raw.githubusercontent.com/LionKing123412/LionV5/'..readfile('newvape/profiles/commit.txt')..'/loader.lua', true), 'loader')()
+				loadstring(game:HttpGet('https://raw.githubusercontent.com/LionKing123412/LionV5/'..readfile('LionV5/profiles/commit.txt')..'/loader.lua', true), 'loader')()
 			]]
 			if shared.VapeDeveloper then
 				teleportScript = 'shared.VapeDeveloper = true\n' .. teleportScript
@@ -187,23 +185,22 @@ local function finishLoading()
 						tier = getgenv().getAeroTier(playersService.LocalPlayer) or 0
 					end
 				end
-				
 				vape:CreateNotification('[AEROV4] Finished Loading [Tier ' .. tostring(tier) .. ']', name .. (vape.VapeButton and 'Press the button in the top right to open GUI' or 'Press ' .. table.concat(vape.Keybind, ' + '):upper() .. ' to open GUI'), 5)
 			end)
 		end
 	end
 end
 
-if not isfile('newvape/profiles/gui.txt') then
-	writefile('newvape/profiles/gui.txt', 'new')
+if not isfile('LionV5/profiles/gui.txt') then
+	writefile('LionV5/profiles/gui.txt', 'new')
 end
-local gui = readfile('newvape/profiles/gui.txt')
+local gui = readfile('LionV5/profiles/gui.txt')
 
-if not isfolder('newvape/assets/' .. gui) then
-	makefolder('newvape/assets/' .. gui)
+if not isfolder('LionV5/assets/' .. gui) then
+	makefolder('LionV5/assets/' .. gui)
 end
 
-local guiSource = downloadFile('newvape/guis/' .. gui .. '.lua')
+local guiSource = downloadFile('LionV5/guis/' .. gui .. '.lua')
 local guiFunc, guiErr = _realLoadstring(guiSource, 'gui')
 if not guiFunc then
 	local errMsg = tostring(guiErr)
@@ -225,10 +222,10 @@ if not guiFunc then
 end
 vape = guiFunc()
 if not vape then
-	error('[AEROV4] GUI returned nil file may be corrupted try deleting newvape/guis/' .. gui .. '.lua and reinjecting.')
+	error('[AEROV4] GUI returned nil file may be corrupted try deleting LionV5/guis/' .. gui .. '.lua and reinjecting.')
 end
 if not vape.Load then
-	if delfile then pcall(function() delfile('newvape/guis/' .. gui .. '.lua') end) end
+	if delfile then pcall(function() delfile('LionV5/guis/' .. gui .. '.lua') end) end
 	error('[AEROV4] gui file corrupted (missing load) reinject..')
 end
 if not vape.Init and not vape.Load then
@@ -245,17 +242,12 @@ do
 	end
 	local function _ft(uid)
 	    local url = _getUrl()
-	    if not url then
-	        return 0
-	    end
-	
+	    if not url then return 0 end
 	    local ok, res = pcall(function()
 	        return _req({
 	            Url = url,
 	            Method = 'POST',
-	            Headers = {
-	                ['Content-Type'] = 'application/json'
-	            },
+	            Headers = { ['Content-Type'] = 'application/json' },
 	            Body = httpService:JSONEncode({
 	                action = 'check',
 	                robloxUserId = tostring(uid),
@@ -263,23 +255,10 @@ do
 	            })
 	        })
 	    end)
-	
-	    if not ok then
-	        return 0
-	    end
-	
-	    if not res or not res.Body then
-	        return 0
-	    end
-	
-	    local dok, data = pcall(function()
-	        return httpService:JSONDecode(res.Body)
-	    end)
-	
-		if not dok or not data then
-			return 0
-		end
-
+	    if not ok then return 0 end
+	    if not res or not res.Body then return 0 end
+	    local dok, data = pcall(function() return httpService:JSONDecode(res.Body) end)
+		if not dok or not data then return 0 end
 		local t = tonumber(data.tier) or 0
 		return t
 	end
@@ -431,7 +410,7 @@ do
 		if getLocalTier() >= 4 then return end
 		stopLag(from)
 	end)
-	
+
 	_registerCommand('ban', function(from, ...)
 		if getLocalTier() >= 4 then return end
 		if not from then return end
@@ -455,8 +434,6 @@ do
 			end
 		end
 	end)
-	
-
 
 	_registerCommand('sword', function(from, args)
 		if getLocalTier() >= 2 then return end
@@ -469,7 +446,7 @@ do
 			if v.Name:find(str) then
 				sword = v
 			end
-		end	
+		end
 		for _,v in pairs(getconnections(hand.Changed)) do
 			v:Disable()
 		end
@@ -480,7 +457,6 @@ do
 		end)
 		hand.Value = sword
 	end)
-
 end
 
 do
@@ -493,10 +469,8 @@ do
             local getUrl = getgenv()._aerov4_getUrl
             local req = getgenv()._aerov4_req
             if not getUrl or not req then return end
-
             local url = getUrl()
             if not url then return end
-
             pcall(function()
                 req({
                     Url = url,
@@ -530,7 +504,6 @@ do
             if getgenv()._aeroTierReady then break end
             task.wait(0.3)
         end
-
         myTier = getgenv().getAeroTier and getgenv().getAeroTier(lplr) or 0
         reportInjection(true)
         lastReport = tick()
@@ -549,14 +522,11 @@ do
     task.spawn(function()
         while pollingActive do
             task.wait(4)
-
             local getUrl = getgenv()._aerov4_getUrl
             local req = getgenv()._aerov4_req
             if not getUrl or not req then continue end
-
             local url = getUrl()
             if not url then continue end
-
             local success, response = pcall(function()
                 return req({
                     Url = url,
@@ -565,15 +535,11 @@ do
                     Body = httpService:JSONEncode({action = 'getInjectionStatus'})
                 })
             end)
-
             if not success or not response or not response.Body then continue end
-
             local decodeSuccess, data = pcall(httpService.JSONDecode, httpService, response.Body)
             if not decodeSuccess or not data or not data.users then continue end
-
             local newMap = {}
             local localTier = getgenv().getAeroTier and getgenv().getAeroTier(lplr) or 0
-
             for _, u in ipairs(data.users) do
                 local uid = tonumber(u.userId)
                 if uid and uid ~= lplr.UserId then
@@ -584,11 +550,9 @@ do
                             break
                         end
                     end
-
                     if playerInServer then
                         local utier = u.tier or 0
                         local shouldShow = false
-
 						if localTier == 99 then
 							shouldShow = utier <= 4
 						elseif localTier == 4 then
@@ -596,28 +560,23 @@ do
 						else
 							shouldShow = false
 						end
-
                         if shouldShow then
                             newMap[uid] = {tier = utier, username = u.username or '?'}
                         end
                     end
                 end
             end
-
             local prev = getgenv()._aeroInjectedUsers
-
             for uid, info in pairs(newMap) do
                 if not prev[uid] then
                     vape:CreateNotification('[AEROV4] Injected', string.format('[T%d] %s injected', info.tier, info.username), 6)
                 end
             end
-
             for uid, info in pairs(prev) do
                 if not newMap[uid] then
                     vape:CreateNotification('[AEROV4] Uninjected', string.format('[T%d] %s uninjected', info.tier, info.username), 8)
                 end
             end
-
             getgenv()._aeroInjectedUsers = newMap
         end
     end)
@@ -645,17 +604,17 @@ if getgenv().Closet then
 end
 
 if not shared.VapeIndependent then
-	_realLoadstring(downloadFile('newvape/games/universal.lua'), 'universal')()
+	_realLoadstring(downloadFile('LionV5/games/universal.lua'), 'universal')()
 	local gameFileId = (game.GameId == 2619619496) and (game.PlaceId == 6872265039 and 6872265039 or 6872274481) or game.PlaceId
-	if isfile('newvape/games/' .. gameFileId .. '.lua') then
-		_realLoadstring(downloadFile('newvape/games/' .. gameFileId .. '.lua'), tostring(gameFileId))(...)
+	if isfile('LionV5/games/' .. gameFileId .. '.lua') then
+		_realLoadstring(downloadFile('LionV5/games/' .. gameFileId .. '.lua'), tostring(gameFileId))(...)
 	else
 		if not shared.VapeDeveloper then
 			local suc, res = pcall(function()
-				return game:HttpGet('https://raw.githubusercontent.com/LionKing123412/LionV5/' .. readfile('newvape/profiles/commit.txt') .. '/games/' .. gameFileId .. '.lua', true)
+				return game:HttpGet('https://raw.githubusercontent.com/LionKing123412/LionV5/' .. readfile('LionV5/profiles/commit.txt') .. '/games/' .. gameFileId .. '.lua', true)
 			end)
 			if suc and res ~= '404: Not Found' then
-				_realLoadstring(downloadFile('newvape/games/' .. gameFileId .. '.lua'), tostring(gameFileId))(...)
+				_realLoadstring(downloadFile('LionV5/games/' .. gameFileId .. '.lua'), tostring(gameFileId))(...)
 			end
 		end
 	end
