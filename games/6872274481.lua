@@ -16006,18 +16006,17 @@ end
             end
         end
         if OuterFirst and OuterFirst.Enabled then
-            local exposed = getExposedFaceCount(v)
-            if exposed == 0 then continue end
-            local score = -(exposed * 1000) + dist
-            local bestScore = best and (-(getExposedFaceCount(best) * 1000) + bestDist) or math.huge
-            if score < bestScore then
-                best = v
-                bestDist = dist
-            end
-        else
-            best = v
-            bestDist = dist
-        end
+    		local exposed = getExposedFaceCount(v)
+    		local score = -(exposed * 1000) + dist
+    		local bestScore = best and (-(getExposedFaceCount(best) * 1000) + bestDist) or math.huge
+    		if score < bestScore then
+        		best = v
+        		bestDist = dist
+    		end
+		else
+    		best = v
+    		bestDist = dist
+		end
     end
 end
 						eval(Bed.Enabled and beds, true)
