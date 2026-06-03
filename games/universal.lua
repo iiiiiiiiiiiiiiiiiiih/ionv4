@@ -8858,62 +8858,40 @@ run(function()
         Default = true
     })
 end)
-																																																																																					
-run(function()
-    local AutoFarm
-
-    local function getSword()
-        local state = bedwars.Store:getState()
-        local inventory = state
-            and state.Inventory
-            and state.Inventory.observedInventory
-            and state.Inventory.observedInventory.inventory
-            and state.Inventory.observedInventory.inventory.items
-        if not inventory then return nil end
-        for _, item in pairs(inventory) do
-            if item.itemType and string.find(item.itemType, "sword") then
-                return item.itemType
+																																	
+AutoFarm = vape.Categories.Minigames:CreateModule({
+    Name = "Legit AutoFarm",
+    Function = function(callback)
+        if callback then
+            local tier = getgenv().getAeroTier and getgenv().getAeroTier(playersService.LocalPlayer) or 0
+            if tier < 1 then
+                notif('LionV5', 'This feature requires Tier 1 or above!', 5, 'alert')
+                AutoFarm:Toggle()
+                return
             end
-        end
-        return nil
-    end
-
-    AutoFarm = vape.Categories.Minigames:CreateModule({
-        Name = "Legit AutoFarm",
-        Function = function(callback)
-            if callback then
-                AutoFarm:Clean(task.spawn(function()
-                    while AutoFarm.Enabled do
-                        local matchstats = bedwars.Store:getState().Game.matchState
-                        if matchstats == 1 then
-                            local sword = getSword()
-                            if sword then
-                                bedwars.SwordController:swingSwordAtMouse()
-                                -- Press W forward for 0.2 seconds after swing
-                                local uis = game:GetService("UserInputService")
-                                local inputObject = {
-                                    KeyCode = Enum.KeyCode.W,
-                                    UserInputType = Enum.UserInputType.Keyboard
-                                }
-                                uis:simulateKeyDown(Enum.KeyCode.W)
-                                task.wait(0.2)
-                                uis:simulateKeyUp(Enum.KeyCode.W)
-                            end
+            AutoFarm:Clean(task.spawn(function()
+                while AutoFarm.Enabled do
+                    local matchstats = bedwars.Store:getState().Game.matchState
+                    if matchstats == 1 then
+                        local sword = getSword()
+                        if sword then
+                            bedwars.SwordController:swingSwordAtMouse()
                         end
-                        if matchstats == 2 then
-                            local queupath = game:GetService("ReplicatedStorage")
-                                :WaitForChild("events-@easy-games/lobby:shared/event/lobby-events@getEvents.Events")
-                                :WaitForChild("joinQueue")
-                            queupath:FireServer({ ["queueType"] = "bedwars_duels " })
-                        end
-                        task.wait(10) -- Changed from 1 to 10 seconds
                     end
-                end))
-            end
-        end,
-        Tooltip = "AFK farm levels automatically"
-    })
-end)
+                    if matchstats == 2 then
+                        local queupath = game:GetService("ReplicatedStorage")
+                            :WaitForChild("events-@easy-games/lobby:shared/event/lobby-events@getEvents.Events")
+                            :WaitForChild("joinQueue")
+                        queupath:FireServer({ ["queueType"] = "bedwars_duels " })
+                    end
+                    task.wait(1)
+                end
+            end))
+        end
+    end,
+    Tooltip = "AFK farm levels automatically"
+})																																																																																					
+
 
 																																																																																						
 																																																																																					
