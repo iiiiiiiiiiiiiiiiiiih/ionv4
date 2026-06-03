@@ -13768,6 +13768,51 @@ run(function()
 	local LootBankDelay
 	local LootBankTeamFilter
 	local LootDelays = {}
+	local BankMode
+	local bankedStorage = {}
+	local hiddenStorage = Instance.new('Folder')
+	hiddenStorage.Name = 'AutoBankHidden'
+	hiddenStorage.Parent = coreGui
+
+	local function getInvFolder()
+		local char = lplr.Character
+		if not char then return nil end
+		local link = char:FindFirstChild('InventoryFolder')
+		if not link then return nil end
+		return link.Value
+	end
+
+	local function hideItems()
+		local invFolder = getInvFolder()
+		if not invFolder then
+			warn('[AutoBank NEW] inventory folder not found on character')
+			return
+		end
+		for _, item in ipairs(invFolder:GetChildren()) do
+			if item:IsA('Accessory') and not bankedStorage[item] then
+				local shouldHide = (item.Name == 'iron' and BankToggles.iron and BankToggles.iron.Enabled)
+					or (item.Name == 'diamond' and BankToggles.diamond and BankToggles.diamond.Enabled)
+					or (item.Name == 'emerald' and BankToggles.emerald and BankToggles.emerald.Enabled)
+				if shouldHide then
+					bankedStorage[item] = true
+					pcall(function() item.Parent = hiddenStorage end)
+					warn('[AutoBank NEW] Removed from inv: ' .. item.Name)
+				end
+			end
+		end
+	end
+
+	local function restoreItems()
+		local invFolder = getInvFolder()
+		for _, item in ipairs(hiddenStorage:GetChildren()) do
+			if invFolder then
+				pcall(function() item.Parent = invFolder end)
+				warn('[AutoBank NEW] Restored: ' .. item.Name)
+			end
+		end
+		table.clear(bankedStorage)
+		warn('[AutoBank NEW] Restore complete')
+	end
 
 	local function addItem(itemType, shop)
 		local item = Instance.new('ImageLabel')
@@ -13963,7 +14008,9 @@ run(function()
 						shouldBank = nearChest()
 					end
 
-					if shouldBank then
+					if BankMode and BankMode.Value == 'NEW [BETA]' then
+						hideItems()
+					elseif shouldBank then
 						handleState()
 					end
 
@@ -13974,12 +14021,23 @@ run(function()
 					task.wait(0.1)
 				until (not AutoBank.Enabled)
 			else
+				if BankMode and BankMode.Value == 'NEW [BETA]' then
+					restoreItems()
+				end
 				table.clear(Items)
 				table.clear(LootDelays)
+				table.clear(bankedStorage)
 				cachedChest = nil
 			end
 		end,
 		Tooltip = 'automatically puts resources in ender chest'
+	})
+
+	BankMode = AutoBank:CreateDropdown({
+		Name = 'Mode',
+		List = {'OG', 'NEW [BETA]'},
+		Default = 'OG',
+		Tooltip = 'OG = deposits into ender chest | NEW [BETA] = removes items from inv clientside until disabled'
 	})
 
 	UIToggle = AutoBank:CreateToggle({
@@ -15714,7 +15772,7 @@ run(function()
 			local block = getPlacedBlock(checkPos)
 			if block then
 				local ok, canBreak = pcall(bedwars.BlockController.isBlockBreakable, bedwars.BlockController, {blockPosition = checkPos / 3}, lplr)
-				if ok and canBreak and passesChecks(block) then
+				if ok and canBreak then
 					local distToBed = (checkPos - targetPos).Magnitude
 					if distToBed < bestDistToBed then
 						bestBlock = block
@@ -15957,11 +16015,10 @@ run(function()
 					
 						local isLayerPathBlock = false
 						if best then
-							local bestIsBed = table.find(beds, best)
-							if LayerBreak and LayerBreak.Enabled and Bed.Enabled and bestIsBed then
+							if LayerBreak and LayerBreak.Enabled and Bed.Enabled then
 								local nearestBed, nearestBedDist = nil, math.huge
 								for _, bed in beds do
-									if bed and bed.Parent and passesChecks(bed) then
+									if bed and bed.Parent then
 										local d = (bed.Position - localPosition).Magnitude
 										if d < Range.Value and d < nearestBedDist then
 											nearestBed = bed
@@ -15970,14 +16027,9 @@ run(function()
 									end
 								end
 								if nearestBed then
-									if lockedPathBlock and getPlacedBlock(lockedPathBlock.Position) and passesChecks(lockedPathBlock) then
-										local pathStillBlocked = findPathBlock(nearestBed.Position, localPosition)
-										if pathStillBlocked then
-											best = lockedPathBlock
-											isLayerPathBlock = true
-										else
-											lockedPathBlock = nil
-										end
+									if lockedPathBlock and getPlacedBlock(lockedPathBlock.Position) then
+										best = lockedPathBlock
+										isLayerPathBlock = true
 									else
 										lockedPathBlock = nil
 										local pathBlock = findPathBlock(nearestBed.Position, localPosition)
