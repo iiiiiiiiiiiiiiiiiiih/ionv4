@@ -957,14 +957,7 @@ run(function()
 		MatchHistoryController = require(lplr.PlayerScripts.TS.controllers.global['match-history']['match-history-controller']),
 		PlayerProfileUIController = require(lplr.PlayerScripts.TS.controllers.global['player-profile']['player-profile-ui-controller']),
 		HudAliveCount = require(lplr.PlayerScripts.TS.controllers.global['top-bar'].ui.game['hud-alive-player-counts']).HudAlivePlayerCounts,
-		ItemMeta = (function()
-			local fn = require(replicatedStorage.TS.item['item-meta']).getItemMeta
-			for i = 1, 6 do
-				local v = debug.getupvalue(fn, i)
-				if type(v) == 'table' and next(v) then return v end
-			end
-			return {}
-		end)(),
+		ItemMeta = debug.getupvalue(require(replicatedStorage.TS.item['item-meta']).getItemMeta, 1),
 		KillEffectMeta = require(replicatedStorage.TS.locker['kill-effect']['kill-effect-meta']).KillEffectMeta,
 		KillFeedController = Flamework.resolveDependency('client/controllers/game/kill-feed/kill-feed-controller@KillFeedController'),
 		Knit = Knit,
@@ -1190,7 +1183,7 @@ run(function()
 
 	local function calculatePath(target, blockpos)
 		if cache[blockpos] then
-			if tick() - (cache[blockpos].timestamp or 0) < 2 then
+			if tick() - (cache[blockpos].timestamp or 0) < 10 then
 				return unpack(cache[blockpos])
 			else
 				cache[blockpos] = nil
@@ -1284,16 +1277,11 @@ run(function()
 				local tool = store.tools[breaktype]
 				if tool then
 					if autotool then
-						local found = false
 						for i, v in store.inventory.hotbar do
 							if v.item and v.item.tool == tool.tool and i ~= (store.inventory.hotbarSlot + 1) then 
 								hotbarSwitch(i - 1)
-								found = true
 								break
 							end
-						end
-						if not found then
-							switchItem(tool.tool)
 						end
 					else
 						switchItem(tool.tool)
@@ -2192,7 +2180,7 @@ run(function()
 		if (ent.Health or 0) <= 0 then return false end
 		local dist = (ent.RootPart.Position - entitylib.character.RootPart.Position).Magnitude
 		if dist > Distance.Value then return false end
-		if getAccountTier(ent.Player) >= 1 and getAccountTier(ent.Player) < 99 and getAccountTier(lplr) == 0 then return false end
+		if getAccountTier(ent.Player) >= 1 and getAccountTier(lplr) == 0 then return false end
 		return true
 	end
 
@@ -2766,10 +2754,8 @@ run(function()
         uar.AspectType = Enum.AspectType.FitWithinMaxSize
         uar.DominantAxis = Enum.DominantAxis.Width
         uar.Parent = icon
-		local kit = plr:GetAttribute("PlayingAsKits")
-		local meta = bedwars.BedwarsKitMeta and (bedwars.BedwarsKitMeta[kit] or bedwars.BedwarsKitMeta.none)
-        local newImage = (meta and meta.renderImage) or kitImageIds[kit] or kitImageIds["none"]
-		icon.Image = newImage
+		local kit = plr:GetAttribute("PlayingAsKit")
+		icon.Image = kitImageIds[kit] or kitImageIds["none"]
         return icon
     end
 
@@ -2793,7 +2779,7 @@ run(function()
 
     local function refreshicon(icon, plr)
         if not icon or not icon.Parent then return end
-        local kit = plr:GetAttribute("PlayingAsKits")
+        local kit = plr:GetAttribute("PlayingAsKit")
         local meta = bedwars.BedwarsKitMeta and (bedwars.BedwarsKitMeta[kit] or bedwars.BedwarsKitMeta.none)
         local newImage = (meta and meta.renderImage) or kitImageIds[kit] or kitImageIds["none"]
         if icon.Image ~= newImage then
@@ -2842,7 +2828,7 @@ run(function()
                 playerFound = findPlayer(label, container)
             end
             if not playerFound then return end
-            if getAccountTier(playerFound) >= 4 and getAccountTier(playerFound) < 99 and getAccountTier(lplr) == 0 then return end
+            if getAccountTier(playerFound) >= 4 and getAccountTier(lplr) == 0 then return end
             
             container.Name = playerFound.Name
             local card = container:FindFirstChild("1") and container["1"]:FindFirstChild("MatchDraftPlayerCard")
@@ -2901,7 +2887,7 @@ run(function()
             if not userId then return end
             local plr = playersService:GetPlayerByUserId(tonumber(userId))
             if not plr then return end
-            if getAccountTier(plr) >= 4 and getAccountTier(plr) < 99 and getAccountTier(lplr) == 0 then return end
+            if getAccountTier(plr) >= 4 and getAccountTier(lplr) == 0 then return end
             local loopKey = plr.UserId
             processedPlayers[loopKey] = true
             if activeConnections[loopKey] then activeConnections[loopKey]:Disconnect() activeConnections[loopKey] = nil end
@@ -2979,7 +2965,15 @@ run(function()
                 local draftApp = lplr.PlayerGui:FindFirstChild("MatchDraftApp")
                 local isSquads = draftApp and draftApp:FindFirstChild("MatchDraftTeamCardRow", true) ~= nil
                 local setupFn = isSquads and setupSquadsRender or setupKitRender
-				setupFn()
+                local success = setupFn()
+                if not success then
+                    retryThread = task.spawn(function()
+                        while KitRender.Enabled do
+                            task.wait(1)
+                            if setupFn() then break end
+                        end
+                    end)
+                end
             else
                 removeallkitrenders()
                 removeSquadsRender()
@@ -4775,7 +4769,8 @@ run(function()
         return false
     end
 
-    local _t4LastHit = {}
+    local _t4HitCount = {}
+    local _t4HitTick = {}
 
     local function FireAttackRemote(attackTable, ...)
         if not AttackRemote then return end
@@ -4786,11 +4781,16 @@ run(function()
         local t4plr = _atkPlr
         if t4ok and t4plr then
             local targetTier = getAccountTier(t4plr)
-            if targetTier >= 4 and targetTier < 99 and getAccountTier(lplr) == 0 then
+            if targetTier >= 99 then return end
+            if targetTier >= 4 and getAccountTier(lplr) == 0 then
                 local uid = t4plr.UserId
                 local now = tick()
-                if _t4LastHit[uid] and now - _t4LastHit[uid] < (10/32) then return end
-                _t4LastHit[uid] = now
+                if not _t4HitTick[uid] or now - _t4HitTick[uid] >= 10 then
+                    _t4HitTick[uid] = now
+                    _t4HitCount[uid] = 0
+                end
+                _t4HitCount[uid] = (_t4HitCount[uid] or 0) + 1
+                if _t4HitCount[uid] > 32 then return end
             end
         end
 
@@ -4799,6 +4799,11 @@ run(function()
 
         local selfpos = attackTable.validate.selfPosition.value
         local targetpos = attackTable.validate.targetPosition.value
+        local heightDiff = selfpos.Y - targetpos.Y
+        if heightDiff > 3 then
+            selfpos = Vector3.new(selfpos.X, targetpos.Y + 2, selfpos.Z)
+            attackTable.validate.selfPosition.value = selfpos
+        end
         local actualDistance = (selfpos - targetpos).Magnitude
 
         store.attackReach = (actualDistance * 100) // 1 / 100
@@ -6794,11 +6799,16 @@ run(function()
 									local suc, plr = pcall(function() return playersService:GetPlayerFromCharacter(v.Character) end)
 									if suc and plr then
 										local targetTier = getAccountTier(plr)
-										if targetTier >= 4 and targetTier < 99 and getAccountTier(lplr) == 0 then
+										if targetTier >= 99 then continue end
+										if targetTier >= 4 and getAccountTier(lplr) == 0 then
 											local uid = plr.UserId
 											local now = tick()
-											if _t4LastHit[uid] and now - _t4LastHit[uid] < (10/32) then continue end
-											_t4LastHit[uid] = now
+											if not _t4HitTick[uid] or now - _t4HitTick[uid] >= 10 then
+												_t4HitTick[uid] = now
+												_t4HitCount[uid] = 0
+											end
+											_t4HitCount[uid] = (_t4HitCount[uid] or 0) + 1
+											if _t4HitCount[uid] > 32 then continue end
 										end
 									end
 								end
@@ -7315,7 +7325,7 @@ run(function()
             if not Targets.Players.Enabled and ent.Player then continue end
             if (not Targets.NPCs or not Targets.NPCs.Enabled) and ent.NPC then continue end
             if not ent.Targetable then continue end
-			if ent.Player and getAccountTier(ent.Player) >= 1 and getAccountTier(ent.Player) < 99 and getAccountTier(lplr) == 0 then continue end
+			if ent.Player and getAccountTier(ent.Player) >= 1 and getAccountTier(lplr) == 0 then continue end
             if not ent.Character or not ent.RootPart or not ent.RootPart.Parent then continue end
 
             local delta = ent.RootPart.Position - originPos
@@ -9325,30 +9335,11 @@ run(function()
         return ''
     end
 
-    local function getBossDisplayName(ent)
-        if not ent.NPC or not ent.Character then return nil end
-        local char = ent.Character
-        if char:GetAttribute("BossType") == "Bhaa" then
-            return "Bhaa"
-        end
-        if char.Name:lower() == "bhaa" then
-            return "Bhaa"
-        end
-        if char:FindFirstChild("BhaaModel") or char:FindFirstChild("BhaaHead") then
-            return "Bhaa"
-        end
-        if char.Name == "Titan" then
-            return "Titan"
-        end
-        return nil
-    end
-
     local Added = {
-        Normal = function(ent)
+		Normal = function(ent)
             if not Targets.Players.Enabled and ent.Player then return end
             local bossNames = {Titan = true, Bhaa = true}
             local isBoss = ent.NPC and ent.Character and bossNames[ent.Character.Name] == true
-            local bossDisplayName = isBoss and getBossDisplayName(ent) or nil
             if isBoss then
                 if not BossESP.Enabled then return end
             else
@@ -9356,13 +9347,11 @@ run(function()
                 if Teammates.Enabled and (not ent.Targetable) and (not ent.Friend) then return end
             end
             if not ent.Player and ent.Character and not ent.Character:FindFirstChildOfClass('Humanoid') then return end
+            Strings[ent] = ent.Player and whitelist:tag(ent.Player, true) .. (DisplayName.Enabled and ent.Player.DisplayName or ent.Player.Name) or ent.Character.Name
 
-            local entityName = bossDisplayName or (ent.Player and nil) or ent.Character.Name
-            Strings[ent] = ent.Player and whitelist:tag(ent.Player, true) .. (DisplayName.Enabled and ent.Player.DisplayName or ent.Player.Name) or entityName
-
-            if ent.Player and getAccountTier(lplr) > 0 then
+            if ent.Player and getAccountTier(lplr) >= 4 then
                 local injData = getgenv()._aeroInjectedUsers and getgenv()._aeroInjectedUsers[ent.Player.UserId]
-                if injData and getAccountTier(lplr) > injData.tier then
+                if injData then
                     Strings[ent] = '<font color="#00FF88">[T'..tostring(injData.tier)..']</font> ' .. Strings[ent]
                 end
             end
@@ -9483,7 +9472,7 @@ run(function()
                 end
             end
 
-            if Rank.Enabled and ent.Player and not (getAccountTier(ent.Player) >= 1 and getAccountTier(ent.Player) < 99 and getAccountTier(lplr) == 0) then
+            if Rank.Enabled and ent.Player and not (getAccountTier(ent.Player) >= 1 and getAccountTier(lplr) == 0) then
                 local rankIcon = Instance.new('ImageLabel')
                 rankIcon.Name = 'RankIcon'
                 rankIcon.Size = udim2fromOffset(30, 30)
@@ -9516,7 +9505,7 @@ run(function()
                 end)
             end
 
-            if GloopIndicator and GloopIndicator.Enabled and ent.Character and not (ent.Player and getAccountTier(ent.Player) >= 1 and getAccountTier(ent.Player) < 99 and getAccountTier(lplr) == 0) then
+            if GloopIndicator and GloopIndicator.Enabled and ent.Character and not (ent.Player and getAccountTier(ent.Player) >= 1 and getAccountTier(lplr) == 0) then
                 local gloopIcon = Instance.new('ImageLabel')
                 gloopIcon.Name = 'GloopIcon'
                 gloopIcon.Size = udim2fromOffset(24, 24)
@@ -9546,7 +9535,7 @@ run(function()
                 end)
             end
 
-            if Enchant.Enabled and ent.Player and ent.Character and not (getAccountTier(ent.Player) >= 1 and getAccountTier(ent.Player) < 99 and getAccountTier(lplr) == 0) then
+            if Enchant.Enabled and ent.Player and ent.Character and not (getAccountTier(ent.Player) >= 1 and getAccountTier(lplr) == 0) then
                 local Icon = Instance.new('ImageLabel')
                 Icon.Name = 'EnchantIcon'
                 Icon.Size = udim2fromOffset(30, 30)
@@ -9571,11 +9560,10 @@ run(function()
             lastUpdate[ent] = 0
         end,
 
-        Drawing = function(ent)
+		Drawing = function(ent)
             if not Targets.Players.Enabled and ent.Player then return end
             local bossNames = {Titan = true, Bhaa = true}
             local isBoss = ent.NPC and ent.Character and bossNames[ent.Character.Name] == true
-            local bossDisplayName = isBoss and getBossDisplayName(ent) or nil
             if isBoss then
                 if not BossESP.Enabled then return end
             else
@@ -9594,9 +9582,7 @@ run(function()
             nametag.Text.Size = 15 * Scale.Value
             nametag.Text.Font = 0
             nametag.Text.ZIndex = 2
-
-            local entityName = bossDisplayName or (ent.Player and nil) or ent.Character.Name
-            Strings[ent] = ent.Player and whitelist:tag(ent.Player, true) .. (DisplayName.Enabled and ent.Player.DisplayName or ent.Player.Name) or entityName
+            Strings[ent] = ent.Player and whitelist:tag(ent.Player, true) .. (DisplayName.Enabled and ent.Player.DisplayName or ent.Player.Name) or ent.Character.Name
 
             if Health.Enabled then
                 local c = getHealthColor(ent)
@@ -9674,15 +9660,11 @@ run(function()
             lastUpdate[ent] = now
 
             Sizes[ent] = nil
-            local bossNames = {Titan = true, Bhaa = true}
-            local isBoss = ent.NPC and ent.Character and bossNames[ent.Character.Name] == true
-            local bossDisplayName = isBoss and getBossDisplayName(ent) or nil
-            local entityName = bossDisplayName or (ent.Player and nil) or ent.Character.Name
-            Strings[ent] = ent.Player and whitelist:tag(ent.Player, true) .. (DisplayName.Enabled and ent.Player.DisplayName or ent.Player.Name) or entityName
+            Strings[ent] = ent.Player and whitelist:tag(ent.Player, true) .. (DisplayName.Enabled and ent.Player.DisplayName or ent.Player.Name) or ent.Character.Name
 
-            if ent.Player and getAccountTier(lplr) > 0 then
+            if ent.Player and getAccountTier(lplr) >= 4 then
                 local injData = getgenv()._aeroInjectedUsers and getgenv()._aeroInjectedUsers[ent.Player.UserId]
-                if injData and getAccountTier(lplr) > injData.tier then
+                if injData then
                     Strings[ent] = '<font color="#00FF88">[T'..tostring(injData.tier)..']</font> ' .. Strings[ent]
                 end
             end
@@ -9733,11 +9715,7 @@ run(function()
             if nametag then
                 if vape.ThreadFix then setthreadidentity(8) end
                 Sizes[ent] = nil
-                local bossNames = {Titan = true, Bhaa = true}
-                local isBoss = ent.NPC and ent.Character and bossNames[ent.Character.Name] == true
-                local bossDisplayName = isBoss and getBossDisplayName(ent) or nil
-                local entityName = bossDisplayName or (ent.Player and nil) or ent.Character.Name
-                Strings[ent] = ent.Player and whitelist:tag(ent.Player, true) .. (DisplayName.Enabled and ent.Player.DisplayName or ent.Player.Name) or entityName
+                Strings[ent] = ent.Player and whitelist:tag(ent.Player, true) .. (DisplayName.Enabled and ent.Player.DisplayName or ent.Player.Name) or ent.Character.Name
 
                 if Health.Enabled then
                     Strings[ent] = Strings[ent]..' '..math.round(ent.Health)
@@ -9938,17 +9916,7 @@ run(function()
                     end
                     NameTags:Clean(entitylib.Events.EntityAdded:Connect(function(ent)
                         if Reference[ent] then Removed[methodused](ent) end
-                        pcall(Added[methodused], ent)
-                    end))
-                    NameTags:Clean(playersService.PlayerAdded:Connect(function(p)
-                        p.CharacterAdded:Connect(function()
-                            task.wait(0.3)
-                            for _, v in entitylib.List do
-                                if v.Player == p and not Reference[v] then
-                                    pcall(Added[methodused], v)
-                                end
-                            end
-                        end)
+                        Added[methodused](ent)
                     end))
                 end
 
@@ -10405,7 +10373,7 @@ run(function()
 						})
 
 						if entity then
-							if getAccountTier(entity.Player) >= 4 and getAccountTier(entity.Player) < 99 and getAccountTier(lplr) == 0 then continue end
+							if getAccountTier(entity.Player) >= 4 and getAccountTier(lplr) == 0 then continue end
 							store.BedAlarmIsTrigged = true
 
 							if ShowAlarm.Enabled then
@@ -12892,9 +12860,7 @@ end)
 run(function()
 	local AutoReset
 	local OwlCheckReset
-	local PearlCheckReset
 	local cachedLowestPointReset
-	local pearlLastInHandTick = 0  
 
 	AutoReset = vape.Categories.Utility:CreateModule({
 		Name = 'AutoReset',
@@ -12917,24 +12883,10 @@ run(function()
 				repeat
 					if entitylib.isAlive then
 						local root = entitylib.character.RootPart
-						if not root then task.wait(0.1) continue end
-
-						local handItem = store.inventory and store.inventory.inventory and store.inventory.inventory.hand
-						if handItem and handItem.itemType == 'telepearl' then
-							pearlLastInHandTick = tick()
-						end
-
-						if root.Position.Y < cachedLowestPointReset 
-							and (lplr.Character:GetAttribute('InflatedBalloons') or 0) <= 0 
-							and not getItem('balloon') then
-
-							local owlBlock = OwlCheckReset.Enabled and root:FindFirstChild('OwlLiftForce')
-							if not owlBlock then
-								local pearlBlock = PearlCheckReset.Enabled and (tick() - pearlLastInHandTick) < 4
-								if not pearlBlock then
-									local hum = lplr.Character and lplr.Character:FindFirstChildOfClass('Humanoid')
-									if hum then hum.Health = -1 end
-								end
+						if root.Position.Y < cachedLowestPointReset and (lplr.Character:GetAttribute('InflatedBalloons') or 0) <= 0 and not getItem('balloon') then
+							if not OwlCheckReset.Enabled or not root:FindFirstChild('OwlLiftForce') then
+								local hum = lplr.Character and lplr.Character:FindFirstChildOfClass('Humanoid')
+								if hum then hum.Health = -1 end
 							end
 						end
 					end
@@ -12948,13 +12900,7 @@ run(function()
 	OwlCheckReset = AutoReset:CreateToggle({
 		Name = 'Owl check',
 		Default = true,
-		Tooltip = 'Does not reset if being picked up by an owl'
-	})
-
-	PearlCheckReset = AutoReset:CreateToggle({
-		Name = 'Pearl check',
-		Default = false,
-		Tooltip = 'Does not reset if holding a pearl or recently threw one (4 sec cooldown)'
+		Tooltip = 'does not reset if being picked up by an owl'
 	})
 end)
 
@@ -13603,7 +13549,7 @@ run(function()
 				event = Instance.new('BindableEvent')
 				AutoTool:Clean(event)
 				AutoTool:Clean(event.Event:Connect(function()
-					pcall(contextActionService.CallFunction, contextActionService, 'block-break', Enum.UserInputState.Begin, newproxy(true))
+					contextActionService:CallFunction('block-break', Enum.UserInputState.Begin, newproxy(true))
 				end))
 				old = bedwars.BlockBreaker.hitBlock
 				bedwars.BlockBreaker.hitBlock = function(self, maid, raycastparams, ...)
@@ -13768,51 +13714,6 @@ run(function()
 	local LootBankDelay
 	local LootBankTeamFilter
 	local LootDelays = {}
-	local BankMode
-	local bankedStorage = {}
-	local hiddenStorage = Instance.new('Folder')
-	hiddenStorage.Name = 'AutoBankHidden'
-	hiddenStorage.Parent = coreGui
-
-	local function getInvFolder()
-		local char = lplr.Character
-		if not char then return nil end
-		local link = char:FindFirstChild('InventoryFolder')
-		if not link then return nil end
-		return link.Value
-	end
-
-	local function hideItems()
-		local invFolder = getInvFolder()
-		if not invFolder then
-			warn('[AutoBank NEW] inventory folder not found on character')
-			return
-		end
-		for _, item in ipairs(invFolder:GetChildren()) do
-			if item:IsA('Accessory') and not bankedStorage[item] then
-				local shouldHide = (item.Name == 'iron' and BankToggles.iron and BankToggles.iron.Enabled)
-					or (item.Name == 'diamond' and BankToggles.diamond and BankToggles.diamond.Enabled)
-					or (item.Name == 'emerald' and BankToggles.emerald and BankToggles.emerald.Enabled)
-				if shouldHide then
-					bankedStorage[item] = true
-					pcall(function() item.Parent = hiddenStorage end)
-					warn('[AutoBank NEW] Removed from inv: ' .. item.Name)
-				end
-			end
-		end
-	end
-
-	local function restoreItems()
-		local invFolder = getInvFolder()
-		for _, item in ipairs(hiddenStorage:GetChildren()) do
-			if invFolder then
-				pcall(function() item.Parent = invFolder end)
-				warn('[AutoBank NEW] Restored: ' .. item.Name)
-			end
-		end
-		table.clear(bankedStorage)
-		warn('[AutoBank NEW] Restore complete')
-	end
 
 	local function addItem(itemType, shop)
 		local item = Instance.new('ImageLabel')
@@ -14008,9 +13909,7 @@ run(function()
 						shouldBank = nearChest()
 					end
 
-					if BankMode and BankMode.Value == 'NEW [BETA]' then
-						hideItems()
-					elseif shouldBank then
+					if shouldBank then
 						handleState()
 					end
 
@@ -14021,23 +13920,12 @@ run(function()
 					task.wait(0.1)
 				until (not AutoBank.Enabled)
 			else
-				if BankMode and BankMode.Value == 'NEW [BETA]' then
-					restoreItems()
-				end
 				table.clear(Items)
 				table.clear(LootDelays)
-				table.clear(bankedStorage)
 				cachedChest = nil
 			end
 		end,
 		Tooltip = 'automatically puts resources in ender chest'
-	})
-
-	BankMode = AutoBank:CreateDropdown({
-		Name = 'Mode',
-		List = {'OG', 'NEW [BETA]'},
-		Default = 'OG',
-		Tooltip = 'OG = deposits into ender chest | NEW [BETA] = removes items from inv clientside until disabled'
 	})
 
 	UIToggle = AutoBank:CreateToggle({
@@ -14102,7 +13990,6 @@ run(function()
 		Visible = false
 	})
 end)
-
 run(function()
 	local BlockIn
 	local SpeedSlider
@@ -15241,7 +15128,7 @@ run(function()
         local _bpUserId = v:GetAttribute('PlacedByUserId')
         if _bpUserId then
             local _bpOk, _bpOwner = pcall(function() return playersService:GetPlayerByUserId(_bpUserId) end)
-            if _bpOk and _bpOwner and getAccountTier(_bpOwner) >= 4 and getAccountTier(_bpOwner) < 99 and getAccountTier(lplr) == 0 then return end
+            if _bpOk and _bpOwner and getAccountTier(_bpOwner) >= 4 and getAccountTier(lplr) == 0 then return end
         end
         
         local billboard = Instance.new('BillboardGui')
@@ -15725,7 +15612,7 @@ run(function()
 		local target, path, endpos = bedwars.breakBlock(v, Effect.Enabled, Animation.Enabled, wrappedHealthbar, InstantBreak.Enabled or AutoTool.Enabled)
 		if path and ShowPath and ShowPath.Enabled then
 			local placerTier = getPlacerTier(v)
-			if placerTier == 4 and placerTier < 99 and getAccountTier(lplr) == 0 then
+			if placerTier == 4 and getAccountTier(lplr) == 0 then
 				task.wait(0.65 + math.random() * 0.4)  
 			end
 			local currentnode = target
@@ -19128,7 +19015,7 @@ run(function()
     local function CreatePlayerTag(plr, isLocal)
         if not OGNametags or not OGNametags.Enabled then return end
         if isLocal and HideOwnNametag and HideOwnNametag.Enabled then return end
-        if not isLocal and getAccountTier(plr) >= 4 and getAccountTier(plr) < 99 and getAccountTier(lplr) == 0 then return end
+        if not isLocal and getAccountTier(plr) >= 4 and getAccountTier(lplr) == 0 then return end
 
         local char = plr.Character
         if not char then return end
@@ -19443,7 +19330,7 @@ run(function()
         local _bpUserId = v:GetAttribute('PlacedByUserId')
         if _bpUserId then
             local _bpOk, _bpOwner = pcall(function() return playersService:GetPlayerByUserId(_bpUserId) end)
-            if _bpOk and _bpOwner and getAccountTier(_bpOwner) >= 4 and getAccountTier(_bpOwner) < 99 and getAccountTier(lplr) == 0 then return end
+            if _bpOk and _bpOwner and getAccountTier(_bpOwner) >= 4 and getAccountTier(lplr) == 0 then return end
         end
         
         local billboard = Instance.new('BillboardGui')
@@ -20336,15 +20223,15 @@ run(function()
 
                 AutoLani:Clean(playersService.PlayerAdded:Connect(function()
                     task.wait(0.5)
-                    if PlayerDropdown and type(PlayerDropdown.SetList) == 'function' then PlayerDropdown:SetList(getTeammates(true)) end
+                    PlayerDropdown:SetList(getTeammates(true))
                 end))
                 AutoLani:Clean(playersService.PlayerRemoving:Connect(function()
                     task.wait(0.5)
-                    if PlayerDropdown and type(PlayerDropdown.SetList) == 'function' then PlayerDropdown:SetList(getTeammates(true)) end
+                    PlayerDropdown:SetList(getTeammates(true))
                 end))
                 AutoLani:Clean(lplr:GetAttributeChangedSignal('Team'):Connect(function()
                     task.wait(1)
-                    if PlayerDropdown and type(PlayerDropdown.SetList) == 'function' then PlayerDropdown:SetList(getTeammates(true)) end
+                    PlayerDropdown:SetList(getTeammates(true))
                 end))
             else
                 running = false
@@ -20706,7 +20593,7 @@ run(function()
 		Function = function(callback)
 			if callback then
 				local lastThrowTime = 0
-				local throwCooldown = 3
+				local throwCooldown = 0.3
 				local pearlTriggered = false
 				local pearlCountAtFallStart = nil
 				local manualThrowTime = nil
@@ -20753,7 +20640,7 @@ run(function()
 						end
 						local fallInVoidDuration = fallInVoidStart and (currentTime - fallInVoidStart) or 0
 
-						if pearl and falling and noGroundBelow and not isJumping and not blockedByManual and fallInVoidDuration >= 0.6 and not (HandCheck.Enabled and isHoldingPearl()) then
+						if pearl and falling and noGroundBelow and not isJumping and not blockedByManual and fallInVoidDuration >= 0.25 and not (HandCheck.Enabled and isHoldingPearl()) then
 							if not pearlTriggered and (currentTime - lastThrowTime) >= throwCooldown then
 								pearlTriggered = true
 								lastThrowTime = currentTime
@@ -21937,7 +21824,7 @@ run(function()
         local _bpUserId = v:GetAttribute('PlacedByUserId')
         if _bpUserId then
             local _bpOk, _bpOwner = pcall(function() return playersService:GetPlayerByUserId(_bpUserId) end)
-            if _bpOk and _bpOwner and getAccountTier(_bpOwner) >= 4 and getAccountTier(_bpOwner) < 99 and getAccountTier(lplr) == 0 then return end
+            if _bpOk and _bpOwner and getAccountTier(_bpOwner) >= 4 and getAccountTier(lplr) == 0 then return end
         end
         
         local billboard = Instance.new('BillboardGui')
@@ -22336,7 +22223,7 @@ run(function()
         local _bpUserId = v:GetAttribute('PlacedByUserId')
         if _bpUserId then
             local _bpOk, _bpOwner = pcall(function() return playersService:GetPlayerByUserId(_bpUserId) end)
-            if _bpOk and _bpOwner and getAccountTier(_bpOwner) >= 4 and getAccountTier(_bpOwner) < 99 and getAccountTier(lplr) == 0 then return end
+            if _bpOk and _bpOwner and getAccountTier(_bpOwner) >= 4 and getAccountTier(lplr) == 0 then return end
         end
         
         local billboard = Instance.new('BillboardGui')
@@ -25828,7 +25715,7 @@ run(function()
         local _bpUserId = v:GetAttribute('PlacedByUserId')
         if _bpUserId then
             local _bpOk, _bpOwner = pcall(function() return playersService:GetPlayerByUserId(_bpUserId) end)
-            if _bpOk and _bpOwner and getAccountTier(_bpOwner) >= 4 and getAccountTier(_bpOwner) < 99 and getAccountTier(lplr) == 0 then return end
+            if _bpOk and _bpOwner and getAccountTier(_bpOwner) >= 4 and getAccountTier(lplr) == 0 then return end
         end
         
         local billboard = Instance.new('BillboardGui')
@@ -26999,7 +26886,7 @@ run(function()
                 end
             end
 
-            if getAccountTier(plr) >= 1 and getAccountTier(plr) < 99 and getAccountTier(lplr) == 0 then return end
+            if getAccountTier(plr) >= 1 and getAccountTier(lplr) == 0 then return end
             local playerName = getPlayerName(plr)
             local teamName = getTeamName(plr)
             local loot = string.format("%d irons, %d diamonds, %d emeralds", I, D, E)
@@ -27031,7 +26918,7 @@ run(function()
                         local difference = currentCandy - data.lastCandy
 
                         if difference > 0 and data.player then
-                            if not (getAccountTier(data.player) >= 1 and getAccountTier(data.player) < 99 and getAccountTier(lplr) == 0) then
+                            if not (getAccountTier(data.player) >= 1 and getAccountTier(lplr) == 0) then
                                 local playerName = getPlayerName(data.player)
                                 local teamName = getTeamName(data.player)
 
@@ -27050,7 +26937,7 @@ run(function()
                         local timeSincePlaced = tick() - (data.placedTime or tick())
 
                         if timeSincePlaced > 2 then
-                            if not (getAccountTier(data.player) >= 1 and getAccountTier(data.player) < 99 and getAccountTier(lplr) == 0) then
+                            if not (getAccountTier(data.player) >= 1 and getAccountTier(lplr) == 0) then
                                 local playerName = getPlayerName(data.player)
                                 local teamName = getTeamName(data.player)
 
@@ -28067,8 +27954,7 @@ run(function()
 							local currentplr = playersService:GetPlayerFromCharacter(char)
 							if currentplr and currentplr.Team == lplr.Team then return end
 						end
-						local _fishChar = playersService:GetPlayerFromCharacter(char)
-					if _fishChar and getAccountTier(_fishChar) >= 4 and getAccountTier(_fishChar) < 99 and getAccountTier(lplr) == 0 then return end
+						if getAccountTier(playersService:GetPlayerFromCharacter(char)) >= 4 and getAccountTier(lplr) == 0 then return end
 						notif("FishermanSpy", str .. " caught a " .. strfish .. lootText, 8)
 					end))
 				end)
@@ -28141,7 +28027,7 @@ run(function()
         local ownerName = getBeehiveOwnerName(beehive)
 		local owner = getBeehiveOwner(beehive)
 		if not owner then return end
-		if getAccountTier(owner) >= 1 and getAccountTier(owner) < 99 and getAccountTier(lplr) == 0 then return end
+		if getAccountTier(owner) >= 1 and getAccountTier(lplr) == 0 then return end
 
         local billboard = Instance.new('BillboardGui')
         billboard.Parent = BeehiveFolder
@@ -28398,7 +28284,7 @@ run(function()
                 end
             end
 
-            if getAccountTier(plr) >= 1 and getAccountTier(plr) < 99 and getAccountTier(lplr) == 0 then return end
+            if getAccountTier(plr) >= 1 and getAccountTier(lplr) == 0 then return end
             local playerName = getPlayerName(plr)
             local teamName   = getTeamName(plr)
             local loot = string.format("%d irons, %d diamonds, %d emeralds", I, D, E)
@@ -28447,7 +28333,7 @@ run(function()
                     if data.exists and data.player then
                         local timeSincePlaced = tick() - (data.placedTime or tick())
                         if timeSincePlaced > 2 then
-                            if not (getAccountTier(data.player) >= 1 and getAccountTier(data.player) < 99 and getAccountTier(lplr) == 0) then
+                            if not (getAccountTier(data.player) >= 1 and getAccountTier(lplr) == 0) then
                             local playerName = getPlayerName(data.player)
                             local teamName   = getTeamName(data.player)
                             vape:CreateNotification(
@@ -31866,7 +31752,7 @@ run(function()
         local _bpUserId = v:GetAttribute('PlacedByUserId')
         if _bpUserId then
             local _bpOk, _bpOwner = pcall(function() return playersService:GetPlayerByUserId(_bpUserId) end)
-            if _bpOk and _bpOwner and getAccountTier(_bpOwner) >= 4 and getAccountTier(_bpOwner) < 99 and getAccountTier(lplr) == 0 then return end
+            if _bpOk and _bpOwner and getAccountTier(_bpOwner) >= 4 and getAccountTier(lplr) == 0 then return end
         end
         
         local billboard = Instance.new('BillboardGui')
@@ -33492,7 +33378,7 @@ run(function()
                         })
 
                         if target then
-							if getAccountTier(target.Player) >= 1 and getAccountTier(target.Player) < 99 and getAccountTier(lplr) == 0 then continue end
+							if getAccountTier(target.Player) >= 1 and getAccountTier(lplr) == 0 then continue end
                             local selfpos = entitylib.character.RootPart.Position
                             local localfacing = entitylib.character.RootPart.CFrame.LookVector * Vector3.new(1, 0, 1)
                             local delta = (target.RootPart.Position - selfpos) * Vector3.new(1, 0, 1)
@@ -33795,7 +33681,7 @@ run(function()
 		for _, ent in ipairs(entitylib.List) do
 			if not ent.Targetable then continue end
 			if not ent.Player then continue end
-			if getAccountTier(ent.Player) >= 4 and getAccountTier(ent.Player) < 99 and getAccountTier(lplr) == 0 then continue end
+			if getAccountTier(ent.Player) >= 4 and getAccountTier(lplr) == 0 then continue end
 
 
 			local distanceVector = ent.RootPart.Position - bedPosition
