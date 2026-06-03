@@ -7,11 +7,10 @@ end
 local delfile = delfile or function(file)
 	writefile(file, '')
 end
-
 local function downloadFile(path, func)
 	if not isfile(path) then
 		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/poopparty/poopparty/'..readfile('newvape/profiles/commit.txt')..'/'..select(1, path:gsub('newvape/', '')), true)
+			return game:HttpGet('https://raw.githubusercontent.com/LionKing123412/LionV5/'..readfile('newvape/profiles/commit.txt')..'/'..select(1, path:gsub('newvape/', '')), true)
 		end)
 		if not suc or res == '404: Not Found' then
 			error(res)
@@ -23,7 +22,6 @@ local function downloadFile(path, func)
 	end
 	return (func or readfile)(path)
 end
-
 local function wipeFolder(path)
 	if not isfolder(path) then return end
 	for _, file in listfiles(path) do
@@ -33,20 +31,22 @@ local function wipeFolder(path)
 		end
 	end
 end
-
 for _, folder in {'newvape', 'newvape/games', 'newvape/profiles', 'newvape/assets', 'newvape/libraries', 'newvape/guis'} do
 	if not isfolder(folder) then
 		makefolder(folder)
 	end
 end
-
 if not shared.VapeDeveloper then
-	local _, subbed = pcall(function() 
-		return game:HttpGet('https://github.com/poopparty/poopparty') 
+	local commit = 'main'
+	local ok, res = pcall(function()
+		return game:HttpGet('https://api.github.com/repos/LionKing123412/LionV5/commits/main', true)
 	end)
-	local commit = subbed:find('currentOid')
-	commit = commit and subbed:sub(commit + 13, commit + 52) or nil
-	commit = commit and #commit == 40 and commit or 'main'
+	if ok and res then
+		local h = res:match('"sha":"([a-f0-9]+)"')
+		if h and #h == 40 then
+			commit = h
+		end
+	end
 	if commit == 'main' or (isfile('newvape/profiles/commit.txt') and readfile('newvape/profiles/commit.txt') or '') ~= commit then
 		wipeFolder('newvape')
 		wipeFolder('newvape/games')
@@ -55,7 +55,6 @@ if not shared.VapeDeveloper then
 	end
 	writefile('newvape/profiles/commit.txt', commit)
 end
-
 return loadstring(downloadFile('newvape/main.lua'), 'main')({
     Username = shared.ValidatedUsername
 })
