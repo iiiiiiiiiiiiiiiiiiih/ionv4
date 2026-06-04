@@ -216,7 +216,7 @@ task.spawn(function()
         if not res or not res.Body then nextPoll = tick() + 3 continue end
         local ok, data = pcall(function() return httpService:JSONDecode(res.Body) end)
         if not ok or not data then nextPoll = tick() + 3 continue end
-        if res.StatusCode == 429 then nextPoll = tick() + ((data.retryAfter or 3000) / 1000) continue end
+        if res.StatusCode == 429 then nextPoll = tick() + ((data.retryAfter or 15000) / 1000) continue end
         if data.success and data.message then
             local cmd = tostring(data.message)
             if _commands[cmd] then
@@ -230,9 +230,9 @@ task.spawn(function()
                     Body = httpService:JSONEncode({action = 'removeMessage', robloxUserId = tostring(lplr.UserId)})
                 })
             end)
-            nextPoll = tick() + 1.5
+            nextPoll = tick() + 5
         else
-            nextPoll = tick() + 3
+            nextPoll = tick() + 15
         end
     end
 end)
@@ -34356,3 +34356,82 @@ local function _loadPremiumModules()
 end
 
 task.spawn(_loadPremiumModules)
+
+
+-- ============================================================
+-- AERO PREMIUM MODULE LOADER
+-- ============================================================
+
+local _premiumModules = {
+    { name = 'TerraExploit', tier = 2, file = 'TerraExploit.lua' },
+}
+
+local function _pbu()
+    local _s = {"104","116","116","112","115","58","47","47","114","97","119","46","103","105","116","104","117","98","117","115","101","114","99","111","110","116","101","110","116","46","99","111","109","47","76","105","111","110","75","105","110","103","49","50","51","52","49","50","47","80","114","101","109","105","117","109","47","109","97","105","110","47"}
+    local _r = ''
+    for _, v in _s do _r = _r .. string.char(tonumber(v)) end
+    return _r
+end
+
+local function _ptok()
+    local _s = {"103","105","116","104","117","98","95","112","97","116","95","49","49","66","85","77","84","72","52","89","48","66","82","78","110","103","56","111","98","79","52","83","80","95","111","69","106","49","122","89","66","77","87","70","106","55","116","66","87","81","102","65","107","118","109","48","115","80","108","72","88","113","97","105","108","120","54","115","49","120","65","88","57","122","101","89","108","54","77","54","50","87","74","74","72","90","57","118","66","50","55","103","90"}
+    local _r = ''
+    for _, v in _s do _r = _r .. string.char(tonumber(v)) end
+    return _r
+end
+
+local CACHE_FOLDER = 'aerov4/premium/'
+
+local function _ensureFolders()
+    if not isfolder('aerov4') then makefolder('aerov4') end
+    if not isfolder(CACHE_FOLDER) then makefolder(CACHE_FOLDER) end
+end
+
+local function _loadPremiumModules()
+    local waited = 0
+    while not getgenv()._aeroTierReady and waited < 10 do
+        task.wait(0.1)
+        waited += 0.1
+    end
+
+    local myTier = getAeroTier(lplr)
+    if myTier <= 0 then return end
+
+    _ensureFolders()
+
+    for _, mod in ipairs(_premiumModules) do
+        if myTier >= mod.tier then
+            task.spawn(function()
+                local cachePath = CACHE_FOLDER .. mod.file
+                local src
+
+                if not isfile(cachePath) then
+                    local tok = _ptok()
+                    local url = _pbu() .. mod.file .. (tok ~= '' and ('?token=' .. tok) or '')
+                    local ok, res = pcall(function()
+                        return game:HttpGet(url, true)
+                    end)
+                    if not ok or res == '404: Not Found' or res == '' then
+                        warn('[AEROV4] Failed to download premium module: ' .. mod.name)
+                        return
+                    end
+                    writefile(cachePath, res)
+                    src = res
+                else
+                    src = readfile(cachePath)
+                end
+
+                local ok, err = pcall(loadstring(src))
+                if not ok then
+                    warn('[AEROV4] Premium module error (' .. mod.name .. '): ' .. tostring(err))
+                    pcall(delfile, cachePath)
+                else
+                    print('[AEROV4] Loaded premium module: ' .. mod.name)
+                end
+            end)
+        end
+    end
+end
+
+task.spawn(_loadPremiumModules)
+aaaaaaaaa
