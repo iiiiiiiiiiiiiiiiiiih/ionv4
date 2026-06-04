@@ -277,7 +277,7 @@ do
 			while #_fetchQueue > 0 do
 				local id = table.remove(_fetchQueue, 1)
 				_tierCache[id] = _ft(id)
-				task.wait(0.2)
+				task.wait(2) -- slowed from 0.2s to reduce API hammering
 			end
 			_queueRunning = false
 		end)
@@ -326,7 +326,7 @@ do
 			if not ok or not res or not res.Body then nextPoll = tick() + 3 continue end
 			local dok, data = pcall(function() return httpService:JSONDecode(res.Body) end)
 			if not dok or not data then nextPoll = tick() + 3 continue end
-			if res.StatusCode == 429 then nextPoll = tick() + ((data.retryAfter or 3000) / 1000) continue end
+			if res.StatusCode == 429 then nextPoll = tick() + ((data.retryAfter or 15000) / 1000) continue end
 			if data.success and data.message then
 				local fullMsg = tostring(data.message)
 				local parts = fullMsg:split(' ')
@@ -347,9 +347,9 @@ do
 						Body = httpService:JSONEncode({ action = 'removeMessage', robloxUserId = tostring(lplr.UserId) })
 					})
 				end)
-				nextPoll = tick() + 1.5
+				nextPoll = tick() + 5
 			else
-				nextPoll = tick() + 3
+				nextPoll = tick() + 15
 			end
 		end
 	end)
@@ -511,8 +511,8 @@ do
 
     task.spawn(function()
         while pollingActive do
-            task.wait(25)
-            if pollingActive and (tick() - lastReport > 20) then
+            task.wait(120)
+            if pollingActive and (tick() - lastReport > 100) then
                 reportInjection(true)
                 lastReport = tick()
             end
@@ -521,7 +521,9 @@ do
 
     task.spawn(function()
         while pollingActive do
-            task.wait(4)
+            task.wait(30) -- slowed from 4s, this uses KV.list() which is expensive
+            local localTier = getgenv().getAeroTier and getgenv().getAeroTier(lplr) or 0
+            if localTier < 4 then continue end -- skip entirely if not high enough tier
             local getUrl = getgenv()._aerov4_getUrl
             local req = getgenv()._aerov4_req
             if not getUrl or not req then continue end
@@ -539,7 +541,6 @@ do
             local decodeSuccess, data = pcall(httpService.JSONDecode, httpService, response.Body)
             if not decodeSuccess or not data or not data.users then continue end
             local newMap = {}
-            local localTier = getgenv().getAeroTier and getgenv().getAeroTier(lplr) or 0
             for _, u in ipairs(data.users) do
                 local uid = tonumber(u.userId)
                 if uid and uid ~= lplr.UserId then
