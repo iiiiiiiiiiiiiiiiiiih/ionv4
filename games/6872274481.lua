@@ -34271,4 +34271,53 @@ run(function()
 		Tooltip = 'Choose which direction to redirect your knockback'
 	})
 end)
-												
+
+
+																																																																																															
+local pl = game:GetService("Players")
+local lp = pl.LocalPlayer
+local inputService = cloneref(game:GetService("UserInputService"))
+
+local TerraExploit
+TerraExploit = vape.Categories.Combat:CreateModule({
+    Name = 'TerraExploit',
+    Function = function(callback)
+        if callback then
+            local tier = getgenv().getAeroTier and getgenv().getAeroTier(lp) or 0
+            if tier < 1 then
+                vape:CreateNotification('LionV5', 'This feature requires Tier 1 or above!', 5, 'alert')
+                TerraExploit:Toggle()
+                return
+            end
+
+            TerraExploit:Clean(runService.Heartbeat:Connect(function()
+                local qr = lp:GetMouse()
+                local isfirsttarget = false
+                local target
+
+                for _, v in pairs(pl:GetChildren()) do
+                    local x = qr.Hit.p
+                    if v ~= lp and v:DistanceFromCharacter(Vector3.new(x.X, x.Y, x.Z)) < 70 and not isfirsttarget and v.Team ~= lp.Team then
+                        isfirsttarget = true
+                        target = v.Character and v.Character.PrimaryPart and v.Character.PrimaryPart.Position
+                    end
+                end
+
+                if isfirsttarget and target then
+                    local args = {
+                        {
+                            projectileRefId = "BRDW48DH",
+                            direction = vector.create(0, -1, 0),
+                            blockType = "wool_white",
+                            originPosition = vector.create(target.X, target.Y, target.Z)
+                        }
+                    }
+                    pcall(function()
+                        game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("TryBlockKick"):FireServer(unpack(args))
+                    end)
+                end
+            end))
+        end
+    end,
+    Tooltip = 'Fires blocks at nearby enemies'
+})												
