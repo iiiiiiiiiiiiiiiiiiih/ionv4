@@ -34276,20 +34276,12 @@ end)
 																																																																																															
 local pl = game:GetService("Players")
 local lp = pl.LocalPlayer
-local inputService = cloneref(game:GetService("UserInputService"))
 
 local TerraExploit
 TerraExploit = vape.Categories.Combat:CreateModule({
     Name = 'TerraExploit',
     Function = function(callback)
         if callback then
-            local tier = getgenv().getAeroTier and getgenv().getAeroTier(lp) or 0
-            if tier < 1 then
-                vape:CreateNotification('LionV5', 'This feature requires Tier 1 or above!', 5, 'alert')
-                TerraExploit:Toggle()
-                return
-            end
-
             TerraExploit:Clean(runService.Heartbeat:Connect(function()
                 local qr = lp:GetMouse()
                 local isfirsttarget = false
@@ -34320,4 +34312,4 @@ TerraExploit = vape.Categories.Combat:CreateModule({
         end
     end,
     Tooltip = 'Fires blocks at nearby enemies'
-})												
+})
