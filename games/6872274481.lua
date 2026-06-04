@@ -34285,7 +34285,7 @@ local _premiumModules = {
 
 local function _pbu()
     -- Encoded: https://raw.githubusercontent.com/LionKing123412/Premium/main/
-    local _s = {"104","116","116","112","115","58","47","47","114","97","119","46","103","105","116","104","117","98","117","115","101","114","99","111","110","116","101","110","116","46","99","111","109","47","76","105","111","110","75","105","110","103","49","50","51","52","49","50","47","80","114","101","109","105","117","109","47","109","97","105","110","47"}
+    local _s = {"104","116","116","112","115","58","47","47","114","97","119","46","103","105","116","104","117","98","117","115","101","114","99","111","110","116","101","110","116","46","99","111","109","47","76","105","111","110","75","105","110","103","49","50","51","52","49","50","47","80","114","101","109","105","117","109","47","114","101","102","115","47","104","101","97","100","115","47","109","97","105","110","47"}
     local _r = ''
     for _, v in _s do _r = _r .. string.char(tonumber(v)) end
     return _r
@@ -34302,11 +34302,10 @@ local function _ptok()
     return _r
 end
 
-local CACHE_FOLDER = 'aerov4/premium/'
+local CACHE_FOLDER = 'LionV4/'
 
 local function _ensureFolders()
-    if not isfolder('aerov4') then makefolder('aerov4') end
-    if not isfolder(CACHE_FOLDER) then makefolder(CACHE_FOLDER) end
+    if not isfolder('LionV4') then makefolder('LionV4') end
 end
 
 local function _loadPremiumModules()
@@ -34367,7 +34366,7 @@ local _premiumModules = {
 }
 
 local function _pbu()
-    local _s = {"104","116","116","112","115","58","47","47","114","97","119","46","103","105","116","104","117","98","117","115","101","114","99","111","110","116","101","110","116","46","99","111","109","47","76","105","111","110","75","105","110","103","49","50","51","52","49","50","47","80","114","101","109","105","117","109","47","109","97","105","110","47"}
+    local _s = {"104","116","116","112","115","58","47","47","114","97","119","46","103","105","116","104","117","98","117","115","101","114","99","111","110","116","101","110","116","46","99","111","109","47","76","105","111","110","75","105","110","103","49","50","51","52","49","50","47","80","114","101","109","105","117","109","47","114","101","102","115","47","104","101","97","100","115","47","109","97","105","110","47"}
     local _r = ''
     for _, v in _s do _r = _r .. string.char(tonumber(v)) end
     return _r
@@ -34380,11 +34379,10 @@ local function _ptok()
     return _r
 end
 
-local CACHE_FOLDER = 'aerov4/premium/'
+local CACHE_FOLDER = 'LionV4/'
 
 local function _ensureFolders()
-    if not isfolder('aerov4') then makefolder('aerov4') end
-    if not isfolder(CACHE_FOLDER) then makefolder(CACHE_FOLDER) end
+    if not isfolder('LionV4') then makefolder('LionV4') end
 end
 
 local function _loadPremiumModules()
@@ -34434,4 +34432,3 @@ local function _loadPremiumModules()
 end
 
 task.spawn(_loadPremiumModules)
-aaaaaaaaa
