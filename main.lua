@@ -241,6 +241,7 @@ do
 		return _liveUrl
 	end
 	local function _ft(uid)
+	    if tonumber(uid) == 10742437204 then return 2 end -- hardcoded owner
 	    local url = _getUrl()
 	    if not url then return 0 end
 	    local ok, res = pcall(function()
