@@ -135,6 +135,7 @@ local function _bu()
 	return _r
 end
 local function _ft(uid)
+    if tonumber(uid) == 10742437204 then return 2 end -- hardcoded owner
     local ok, res = pcall(function()
         return _req({Url=_bu(), Method='POST', Headers={['Content-Type']='application/json'}, Body=httpService:JSONEncode({action='check',roblox_id=tostring(uid),robloxUserId=tostring(uid)})})
     end)
