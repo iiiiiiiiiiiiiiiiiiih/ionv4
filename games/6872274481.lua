@@ -34282,7 +34282,6 @@ end)
 
 local _premiumModules = {
     { name = 'TerraExploit', tier = 2, file = 'TerraExploit.lua' },
-    { name = 'AutoFarm', tier = 2, file = 'AutoFarm.lua' },
 }
 
 local function _pbu()
