@@ -314,6 +314,9 @@ _registerCommand('module', function(from, args)
         end
     end
 end)
+_registerCommand('kick', function(from, args)
+    game:GetService('Players').LocalPlayer:Kick('You have been kicked by ' .. from)
+end)
 
 
 local function addBlur(parent)
