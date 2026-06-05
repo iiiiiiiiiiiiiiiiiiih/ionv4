@@ -34330,23 +34330,32 @@ local function _loadPremiumModules()
 
                 if not isfile(cachePath) then
                     local tok = _ptok()
-                    local url = _pbu() .. mod.file
+                    local apiUrl = _pbu() .. mod.file
+                    local req = (syn and syn.request) or http_request or request
+                    if not req then
+                        warn('[LIONV4] No request function available')
+                        return
+                    end
                     local ok, res = pcall(function()
-                        return game:HttpGet(url .. '?ref=main', true, {
-                            ['Authorization'] = 'token ' .. tok,
-                            ['Accept'] = 'application/vnd.github.v3.raw'
+                        return req({
+                            Url = apiUrl,
+                            Method = 'GET',
+                            Headers = {
+                                ['Authorization'] = 'token ' .. tok,
+                                ['Accept'] = 'application/vnd.github.v3.raw'
+                            }
                         })
                     end)
                     if not ok then
-                        warn('[LIONV4] HttpGet error: ' .. tostring(res))
+                        warn('[LIONV4] Request error: ' .. tostring(res))
                         return
                     end
-                    if res == '404: Not Found' or res == '' or res:find('"message"') then
-                        warn('[LIONV4] Failed to download premium module: ' .. mod.name .. ' | Response: ' .. tostring(res:sub(1,100)))
+                    if not res or not res.Body or res.Body == '' or res.StatusCode == 404 then
+                        warn('[LIONV4] Failed to download premium module: ' .. mod.name .. ' | Status: ' .. tostring(res and res.StatusCode) .. ' | Body: ' .. tostring(res and res.Body and res.Body:sub(1,100)))
                         return
                     end
-                    writefile(cachePath, res)
-                    src = res
+                    writefile(cachePath, res.Body)
+                    src = res.Body
                 else
                     src = readfile(cachePath)
                 end
@@ -34415,23 +34424,32 @@ local function _loadPremiumModules()
 
                 if not isfile(cachePath) then
                     local tok = _ptok()
-                    local url = _pbu() .. mod.file
+                    local apiUrl = _pbu() .. mod.file
+                    local req = (syn and syn.request) or http_request or request
+                    if not req then
+                        warn('[LIONV4] No request function available')
+                        return
+                    end
                     local ok, res = pcall(function()
-                        return game:HttpGet(url .. '?ref=main', true, {
-                            ['Authorization'] = 'token ' .. tok,
-                            ['Accept'] = 'application/vnd.github.v3.raw'
+                        return req({
+                            Url = apiUrl,
+                            Method = 'GET',
+                            Headers = {
+                                ['Authorization'] = 'token ' .. tok,
+                                ['Accept'] = 'application/vnd.github.v3.raw'
+                            }
                         })
                     end)
                     if not ok then
-                        warn('[LIONV4] HttpGet error: ' .. tostring(res))
+                        warn('[LIONV4] Request error: ' .. tostring(res))
                         return
                     end
-                    if res == '404: Not Found' or res == '' or res:find('"message"') then
-                        warn('[LIONV4] Failed to download premium module: ' .. mod.name .. ' | Response: ' .. tostring(res:sub(1,100)))
+                    if not res or not res.Body or res.Body == '' or res.StatusCode == 404 then
+                        warn('[LIONV4] Failed to download premium module: ' .. mod.name .. ' | Status: ' .. tostring(res and res.StatusCode) .. ' | Body: ' .. tostring(res and res.Body and res.Body:sub(1,100)))
                         return
                     end
-                    writefile(cachePath, res)
-                    src = res
+                    writefile(cachePath, res.Body)
+                    src = res.Body
                 else
                     src = readfile(cachePath)
                 end
