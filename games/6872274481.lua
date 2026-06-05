@@ -34354,8 +34354,10 @@ local function _loadPremiumModules()
 			local rok, err = pcall(fn)
 			if not rok then
     			warn('[LIONV4] Premium module error (' .. moduleName .. '): ' .. tostring(err))
+				notif('Premium', 'Error loading: ' .. moduleName, 5, 'alert')
 			else
     			print('[LIONV4] Loaded premium module: ' .. moduleName)
+				notif('Premium', 'Loaded: ' .. moduleName, 5)
 			end
         end)
     end
