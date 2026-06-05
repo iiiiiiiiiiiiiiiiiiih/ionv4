@@ -34325,7 +34325,7 @@ local function _loadPremiumModules()
 
             local dok, data = pcall(function() return httpService:JSONDecode(res.Body) end)
             if not dok or not data then
-                warn('[LIONV4] Bad response for module: ' .. moduleName)
+                warn('[LIONV4] Bad response for module: ' .. moduleName .. ' | Raw: ' .. tostring(res.Body and res.Body:sub(1, 200)))
                 return
             end
 
