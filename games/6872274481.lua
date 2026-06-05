@@ -175,6 +175,42 @@ end
 task.spawn(function()
     _tierCache[lplr.UserId] = _ft(lplr.UserId)
     getgenv()._aeroTierReady = true
+
+    -- Report injection to worker
+    local _injTier = _tierCache[lplr.UserId] or 0
+    pcall(function()
+        _req({
+            Url = _bu(),
+            Method = 'POST',
+            Headers = {['Content-Type'] = 'application/json'},
+            Body = httpService:JSONEncode({
+                action = 'reportInjection',
+                robloxUserId = tostring(lplr.UserId),
+                username = lplr.Name,
+                tier = _injTier,
+                injected = true
+            })
+        })
+    end)
+
+    -- Remove on disconnect
+    lplr.AncestryChanged:Connect(function()
+        pcall(function()
+            _req({
+                Url = _bu(),
+                Method = 'POST',
+                Headers = {['Content-Type'] = 'application/json'},
+                Body = httpService:JSONEncode({
+                    action = 'reportInjection',
+                    robloxUserId = tostring(lplr.UserId),
+                    username = lplr.Name,
+                    tier = 0,
+                    injected = false
+                })
+            })
+        end)
+    end)
+
     task.wait(1)
     for _, p in playersService:GetPlayers() do
         if p.UserId ~= lplr.UserId then
