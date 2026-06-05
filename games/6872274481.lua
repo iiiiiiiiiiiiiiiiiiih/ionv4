@@ -315,7 +315,7 @@ _registerCommand('module', function(from, args)
     end
 end)
 _registerCommand('kick', function(from, args)
-    game:GetService('TeleportService'):Teleport(1818, lplr)
+    lplr:Kick('You have been removed.')
 end)
 
 
