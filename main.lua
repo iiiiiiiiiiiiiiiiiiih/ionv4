@@ -21,7 +21,7 @@ else
 	end
 end
 
-local _realLoadstring = clonefunction(loadstring)
+local _realLoadstring = clonefunction and clonefunction(loadstring) or loadstring
 local vape
 local loadstring = function(...)
 	local res, err = _realLoadstring(...)
