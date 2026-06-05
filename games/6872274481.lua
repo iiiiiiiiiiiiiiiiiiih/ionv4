@@ -207,6 +207,8 @@ task.spawn(function()
     local nextPoll = 0
     while pollingActive do
         if tick() < nextPoll then task.wait(0.5) continue end
+        -- Only poll if user has a tier
+        if getgenv().getAeroTier and getgenv().getAeroTier(lplr) <= 0 then nextPoll = tick() + 60 continue end
         local res = _req({
             Url = _bu(),
             Method = 'POST',
@@ -230,9 +232,9 @@ task.spawn(function()
                     Body = httpService:JSONEncode({action = 'removeMessage', robloxUserId = tostring(lplr.UserId)})
                 })
             end)
-            nextPoll = tick() + 5
+            nextPoll = tick() + 30
         else
-            nextPoll = tick() + 15
+            nextPoll = tick() + 60
         end
     end
 end)
