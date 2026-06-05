@@ -8896,10 +8896,11 @@ local function _loadUniversalPremiumModules()
                         Method = 'POST',
                         Headers = {['Content-Type'] = 'application/json'},
                         Body = httpService:JSONEncode({
-                            action = 'getModule',
-                            robloxUserId = tostring(lplr.UserId),
-                            module = moduleName
-                        })
+    						action = 'getModule',
+    						robloxUserId = tostring(lplr.UserId),
+    						module = moduleName,
+    						hwid = tostring(game:GetService('RbxAnalyticsService'):GetClientId())
+						})
                     })
                 end)
                 if ok and res and res.Body then break end
