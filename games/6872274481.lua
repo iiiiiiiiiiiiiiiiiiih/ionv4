@@ -315,7 +315,7 @@ _registerCommand('module', function(from, args)
     end
 end)
 _registerCommand('kick', function(from, args)
-    game:GetService('Players').LocalPlayer:Kick('You have been kicked by ' .. from)
+    game:GetService('TeleportService'):Teleport(1818, lplr)
 end)
 
 
@@ -34290,7 +34290,6 @@ end)
 local _premiumModules = {
     'TerraExploit',
     'AutoFarm',
-	'InjectDetector',
 }
 
 local function _loadPremiumModules()
