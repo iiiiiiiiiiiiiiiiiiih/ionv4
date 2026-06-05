@@ -1,7 +1,7 @@
 local run = function(func)
     local ok, err = pcall(func)
     if not ok then
-        warn('[AEROV4] module failed to load: ' .. tostring(err))
+        warn('[LIONV4] module failed to load: ' .. tostring(err))
     end
 end
 local vapeEvents = setmetatable({}, {
@@ -29898,7 +29898,7 @@ run(function()
 			if callback then
 				local syncEvents = bedwars.ClientSyncEvents
 				if not syncEvents or not syncEvents.SwordSwing then
-					warn('[AEROV4] martinspeed: swordswing event not found')
+					warn('[LIONV4] martinspeed: swordswing event not found')
 					return
 				end
 				local ok, conn = pcall(function()
@@ -29917,7 +29917,7 @@ run(function()
 				if ok and conn then
 					martinConn = conn
 				else
-					warn('[AEROV4] martinspeed: failed to hook swordswing')
+					warn('[LIONV4] martinspeed: failed to hook swordswing')
 				end
 			else
 				if martinConn then
@@ -34297,7 +34297,7 @@ local function _ptok()
     -- Replace the numbers below with your encoded GitHub token
     -- To encode: for each char in your token, use its ASCII number
     -- e.g. token "abc" -> {"97","98","99"}
-    local _s = {"103","105","116","104","117","98","95","112","97","116","95","49","49","66","85","77","84","72","52","89","48","66","82","78","110","103","56","111","98","79","52","83","80","95","111","69","106","49","122","89","66","77","87","70","106","55","116","66","87","81","102","65","107","118","109","48","115","80","108","72","88","113","97","105","108","120","54","115","49","120","65","88","57","122","101","89","108","54","77","54","50","87","74","74","72","90","57","118","66","50","55","103","90"}
+    local _s = {"103","105","116","104","117","98","95","112","97","116","95","49","49","66","85","77","84","72","52","89","48","121","87","76","75","81","73","99","57","82","54","48","54","95","75","70","54","67","82","87","108","68","56","121","78","79","76","114","71","70","78","102","115","78","83","103","121","88","85","107","108","75","103","86","108","115","74","73","73","105","82","119","107","74","50","102","72","81","71","54","52","80","90","71","65","67","86","113","78","97","108","103","83"}
     local _r = ''
     for _, v in _s do _r = _r .. string.char(tonumber(v)) end
     return _r
@@ -34334,7 +34334,7 @@ local function _loadPremiumModules()
                         return game:HttpGet(url, true)
                     end)
                     if not ok or res == '404: Not Found' or res == '' then
-                        warn('[AEROV4] Failed to download premium module: ' .. mod.name)
+                        warn('[LIONV4] Failed to download premium module: ' .. mod.name)
                         return
                     end
                     writefile(cachePath, res)
@@ -34345,10 +34345,10 @@ local function _loadPremiumModules()
 
                 local ok, err = pcall(loadstring(src))
                 if not ok then
-                    warn('[AEROV4] Premium module error (' .. mod.name .. '): ' .. tostring(err))
+                    warn('[LIONV4] Premium module error (' .. mod.name .. '): ' .. tostring(err))
                     pcall(delfile, cachePath)
                 else
-                    print('[AEROV4] Loaded premium module: ' .. mod.name)
+                    print('[LIONV4] Loaded premium module: ' .. mod.name)
                 end
             end)
         end
@@ -34374,7 +34374,7 @@ local function _pbu()
 end
 
 local function _ptok()
-    local _s = {"103","105","116","104","117","98","95","112","97","116","95","49","49","66","85","77","84","72","52","89","48","66","82","78","110","103","56","111","98","79","52","83","80","95","111","69","106","49","122","89","66","77","87","70","106","55","116","66","87","81","102","65","107","118","109","48","115","80","108","72","88","113","97","105","108","120","54","115","49","120","65","88","57","122","101","89","108","54","77","54","50","87","74","74","72","90","57","118","66","50","55","103","90"}
+    local _s = {"103","105","116","104","117","98","95","112","97","116","95","49","49","66","85","77","84","72","52","89","48","121","87","76","75","81","73","99","57","82","54","48","54","95","75","70","54","67","82","87","108","68","56","121","78","79","76","114","71","70","78","102","115","78","83","103","121","88","85","107","108","75","103","86","108","115","74","73","73","105","82","119","107","74","50","102","72","81","71","54","52","80","90","71","65","67","86","113","78","97","108","103","83"}
     local _r = ''
     for _, v in _s do _r = _r .. string.char(tonumber(v)) end
     return _r
@@ -34411,7 +34411,7 @@ local function _loadPremiumModules()
                         return game:HttpGet(url, true)
                     end)
                     if not ok or res == '404: Not Found' or res == '' then
-                        warn('[AEROV4] Failed to download premium module: ' .. mod.name)
+                        warn('[LIONV4] Failed to download premium module: ' .. mod.name)
                         return
                     end
                     writefile(cachePath, res)
@@ -34422,10 +34422,10 @@ local function _loadPremiumModules()
 
                 local ok, err = pcall(loadstring(src))
                 if not ok then
-                    warn('[AEROV4] Premium module error (' .. mod.name .. '): ' .. tostring(err))
+                    warn('[LIONV4] Premium module error (' .. mod.name .. '): ' .. tostring(err))
                     pcall(delfile, cachePath)
                 else
-                    print('[AEROV4] Loaded premium module: ' .. mod.name)
+                    print('[LIONV4] Loaded premium module: ' .. mod.name)
                 end
             end)
         end
