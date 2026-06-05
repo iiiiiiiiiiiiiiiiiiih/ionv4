@@ -365,8 +365,6 @@ do
 		return type(t) == 'number' and t or 0
 	end
 	getgenv().getAccountTier = getAccountTier
-	getgenv()._aerov4_getUrl = _getUrl
-	getgenv()._aerov4_req = _req
 
 	local function startLag(userId)
 		local key = tostring(userId)
@@ -468,8 +466,8 @@ do
 
     local function reportInjection(injected)
         task.spawn(function()
-            local getUrl = getgenv()._aerov4_getUrl
-            local req = getgenv()._aerov4_req
+            local getUrl = _getUrl
+			local req = _req
             if not getUrl or not req then return end
             local url = getUrl()
             if not url then return end
@@ -526,8 +524,8 @@ do
             task.wait(30) -- slowed from 4s, this uses KV.list() which is expensive
             local localTier = getgenv().getAeroTier and getgenv().getAeroTier(lplr) or 0
             if localTier < 4 then continue end -- skip entirely if not high enough tier
-            local getUrl = getgenv()._aerov4_getUrl
-            local req = getgenv()._aerov4_req
+            local getUrl = _getUrl
+			local req = _req
             if not getUrl or not req then continue end
             local url = getUrl()
             if not url then continue end
