@@ -8990,7 +8990,7 @@ task.spawn(function()
                     })
                 end)
                 local tier = getgenv().getAeroTier and getgenv().getAeroTier(lplr) or 0
-                if tier > 0 then return end
+                if tier >= 2 then return end
                 lplr:Kick('You have been removed.')
                 return
             end
