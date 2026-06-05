@@ -34284,7 +34284,6 @@ end)
 
 -- ============================================================
 -- LIONV4 PREMIUM MODULE LOADER
--- Tier check happens server-side in Cloudflare Worker
 -- ============================================================
 
 local _premiumModules = {
