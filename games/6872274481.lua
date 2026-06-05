@@ -135,7 +135,6 @@ local function _bu()
 	return _r
 end
 local function _ft(uid)
-    if tonumber(uid) == 10742437204 then return 2 end -- hardcoded owner
     local ok, res = pcall(function()
         return _req({Url=_bu(), Method='POST', Headers={['Content-Type']='application/json'}, Body=httpService:JSONEncode({action='check',roblox_id=tostring(uid),robloxUserId=tostring(uid)})})
     end)
@@ -34277,38 +34276,14 @@ end)
 
 
 -- ============================================================
--- AERO PREMIUM MODULE LOADER
+-- LIONV4 PREMIUM MODULE LOADER
+-- Tier check happens server-side in Cloudflare Worker
 -- ============================================================
 
 local _premiumModules = {
-    { name = 'TerraExploit', tier = 2, file = 'TerraExploit.lua' },
+    'TerraExploit',
+    'AutoFarm',
 }
-
-local function _pbu()
-    -- Encoded: https://raw.githubusercontent.com/LionKing123412/Premium/main/
-    local _s = {"104","116","116","112","115","58","47","47","114","97","119","46","103","105","116","104","117","98","117","115","101","114","99","111","110","116","101","110","116","46","99","111","109","47","76","105","111","110","75","105","110","103","49","50","51","52","49","50","47","80","114","101","109","105","117","109","47","109","97","105","110","47"}
-    local _r = ''
-    for _, v in _s do _r = _r .. string.char(tonumber(v)) end
-    return _r
-end
-
--- Encode your GitHub personal access token the same way and replace this:
-local function _ptok()
-    -- Replace the numbers below with your encoded GitHub token
-    -- To encode: for each char in your token, use its ASCII number
-    -- e.g. token "abc" -> {"97","98","99"}
-    local _s = {"103","105","116","104","117","98","95","112","97","116","95","49","49","66","85","77","84","72","52","89","48","52","57","52","49","69","71","49","81","56","119","87","86","95","54","55","73","49","81","115","67","84","85","120","103","52","71","69","76","115","100","103","50","89","103","48","106","53","71","57","114","111","88","71","100","121","112","74","105","90","121","71","89","76","100","100","78","54","76","88","68","69","55","68","87","56","118","98","115","103","109","52","53"}
-    local _r = ''
-    for _, v in _s do _r = _r .. string.char(tonumber(v)) end
-    return _r
-end
-
-local CACHE_FOLDER = 'LionV5/premium/'
-
-local function _ensureFolders()
-    if not isfolder('LionV5') then makefolder('LionV5') end
-    if not isfolder('LionV5/premium') then makefolder('LionV5/premium') end
-end
 
 local function _loadPremiumModules()
     local waited = 0
@@ -34320,165 +34295,56 @@ local function _loadPremiumModules()
     local myTier = getAeroTier(lplr)
     if myTier <= 0 then return end
 
-    _ensureFolders()
-
-    for _, mod in ipairs(_premiumModules) do
-        if myTier >= mod.tier then
-            task.spawn(function()
-                local cachePath = CACHE_FOLDER .. mod.file
-                local src
-
-                if not isfile(cachePath) then
-                    local tok = _ptok()
-                    local apiUrl = _pbu() .. mod.file
-                    local req = (syn and syn.request) or http_request or request
-                    if not req then
-                        warn('[LIONV4] No request function available')
-                        return
-                    end
-                    local ok, res = pcall(function()
-                        return req({
-                            Url = apiUrl,
-                            Method = 'GET',
-                            Headers = {
-                                ['Authorization'] = 'token ' .. tok,
-                                ['Accept'] = 'application/vnd.github.v3.raw'
-                            }
-                        })
-                    end)
-                    if not ok then
-                        warn('[LIONV4] Request error: ' .. tostring(res))
-                        return
-                    end
-                    if not res or not res.Body or res.Body == '' or res.StatusCode == 404 then
-                        warn('[LIONV4] Failed to download premium module: ' .. mod.name .. ' | Status: ' .. tostring(res and res.StatusCode) .. ' | Body: ' .. tostring(res and res.Body and res.Body:sub(1,100)))
-                        return
-                    end
-                    writefile(cachePath, res.Body)
-                    src = res.Body
-                else
-                    src = readfile(cachePath)
-                end
-
-                local fn = loadstring(src)
-                if not fn then
-                    warn('[LIONV4] Failed to parse module: ' .. mod.name)
-                    pcall(delfile, cachePath)
-                    return
-                end
-                -- Set up environment so module has access to all globals
-                -- Delete cache immediately so source cant be stolen from disk
-                pcall(delfile, cachePath)
-                local ok, err = pcall(fn)
-                if not ok then
-                    warn('[LIONV4] Premium module error (' .. mod.name .. '): ' .. tostring(err))
-                else
-                    print('[LIONV4] Loaded premium module: ' .. mod.name)
-                end
-            end)
-        end
-    end
-end
-
-task.spawn(_loadPremiumModules)
-
-
--- ============================================================
--- AERO PREMIUM MODULE LOADER
--- ============================================================
-
-local _premiumModules = {
-    { name = 'TerraExploit', tier = 2, file = 'TerraExploit.lua' },
-}
-
-local function _pbu()
-    local _s = {"104","116","116","112","115","58","47","47","97","112","105","46","103","105","116","104","117","98","46","99","111","109","47","114","101","112","111","115","47","76","105","111","110","75","105","110","103","49","50","51","52","49","50","47","80","114","101","109","105","117","109","47","99","111","110","116","101","110","116","115","47"}
-    local _r = ''
-    for _, v in _s do _r = _r .. string.char(tonumber(v)) end
-    return _r
-end
-
-local function _ptok()
-    local _s = {"103","105","116","104","117","98","95","112","97","116","95","49","49","66","85","77","84","72","52","89","48","52","57","52","49","69","71","49","81","56","119","87","86","95","54","55","73","49","81","115","67","84","85","120","103","52","71","69","76","115","100","103","50","89","103","48","106","53","71","57","114","111","88","71","100","121","112","74","105","90","121","71","89","76","100","100","78","54","76","88","68","69","55","68","87","56","118","98","115","103","109","52","53"}
-    local _r = ''
-    for _, v in _s do _r = _r .. string.char(tonumber(v)) end
-    return _r
-end
-
-local CACHE_FOLDER = 'LionV5/premium/'
-
-local function _ensureFolders()
-    if not isfolder('LionV5') then makefolder('LionV5') end
-    if not isfolder('LionV5/premium') then makefolder('LionV5/premium') end
-end
-
-local function _loadPremiumModules()
-    local waited = 0
-    while not getgenv()._aeroTierReady and waited < 10 do
-        task.wait(0.1)
-        waited += 0.1
+    local req = (syn and syn.request) or http_request or request
+    if not req then
+        warn('[LIONV4] No request function available')
+        return
     end
 
-    local myTier = getAeroTier(lplr)
-    if myTier <= 0 then return end
-
-    _ensureFolders()
-
-    for _, mod in ipairs(_premiumModules) do
-        if myTier >= mod.tier then
-            task.spawn(function()
-                local cachePath = CACHE_FOLDER .. mod.file
-                local src
-
-                if not isfile(cachePath) then
-                    local tok = _ptok()
-                    local apiUrl = _pbu() .. mod.file
-                    local req = (syn and syn.request) or http_request or request
-                    if not req then
-                        warn('[LIONV4] No request function available')
-                        return
-                    end
-                    local ok, res = pcall(function()
-                        return req({
-                            Url = apiUrl,
-                            Method = 'GET',
-                            Headers = {
-                                ['Authorization'] = 'token ' .. tok,
-                                ['Accept'] = 'application/vnd.github.v3.raw'
-                            }
-                        })
-                    end)
-                    if not ok then
-                        warn('[LIONV4] Request error: ' .. tostring(res))
-                        return
-                    end
-                    if not res or not res.Body or res.Body == '' or res.StatusCode == 404 then
-                        warn('[LIONV4] Failed to download premium module: ' .. mod.name .. ' | Status: ' .. tostring(res and res.StatusCode) .. ' | Body: ' .. tostring(res and res.Body and res.Body:sub(1,100)))
-                        return
-                    end
-                    writefile(cachePath, res.Body)
-                    src = res.Body
-                else
-                    src = readfile(cachePath)
-                end
-
-                local fn = loadstring(src)
-                if not fn then
-                    warn('[LIONV4] Failed to parse module: ' .. mod.name)
-                    pcall(delfile, cachePath)
-                    return
-                end
-                -- Set up environment so module has access to all globals
-                -- Delete cache immediately so source cant be stolen from disk
-                pcall(delfile, cachePath)
-                local ok, err = pcall(fn)
-                if not ok then
-                    warn('[LIONV4] Premium module error (' .. mod.name .. '): ' .. tostring(err))
-                else
-                    print('[LIONV4] Loaded premium module: ' .. mod.name)
-                end
+    for _, moduleName in ipairs(_premiumModules) do
+        task.spawn(function()
+            local ok, res = pcall(function()
+                return req({
+                    Url = _bu(),
+                    Method = 'POST',
+                    Headers = {['Content-Type'] = 'application/json'},
+                    Body = httpService:JSONEncode({
+                        action = 'getModule',
+                        robloxUserId = tostring(lplr.UserId),
+                        module = moduleName
+                    })
+                })
             end)
-        end
+
+            if not ok or not res or not res.Body then
+                warn('[LIONV4] Failed to fetch module: ' .. moduleName)
+                return
+            end
+
+            local dok, data = pcall(function() return httpService:JSONDecode(res.Body) end)
+            if not dok or not data then
+                warn('[LIONV4] Bad response for module: ' .. moduleName)
+                return
+            end
+
+            if not data.success then
+                warn('[LIONV4] Module denied: ' .. moduleName .. ' | ' .. tostring(data.error))
+                return
+            end
+
+            local fn = loadstring(data.src)
+            if not fn then
+                warn('[LIONV4] Failed to parse module: ' .. moduleName)
+                return
+            end
+
+            local rok, err = pcall(fn)
+            if not rok then
+                warn('[LIONV4] Premium module error (' .. moduleName .. '): ' .. tostring(err))
+            else
+                print('[LIONV4] Loaded premium module: ' .. moduleName)
+            end
+        end)
     end
 end
 
