@@ -34331,18 +34331,18 @@ local function _loadPremiumModules()
                 return
             end
 
-            local fn = loadstring(data.src)
-            if not fn then
-                warn('[LIONV4] Failed to parse module: ' .. moduleName)
-                return
-            end
+			local fn, ferr = loadstring(data.src)
+			if not fn then
+    			warn('[LIONV4] Failed to parse module: ' .. moduleName .. ' | Error: ' .. tostring(ferr))
+    			return
+			end
 
-            local rok, err = pcall(fn)
-            if not rok then
-                warn('[LIONV4] Premium module error (' .. moduleName .. '): ' .. tostring(err))
-            else
-                print('[LIONV4] Loaded premium module: ' .. moduleName)
-            end
+			local rok, err = pcall(fn)
+			if not rok then
+    			warn('[LIONV4] Premium module error (' .. moduleName .. '): ' .. tostring(err))
+			else
+    			print('[LIONV4] Loaded premium module: ' .. moduleName)
+			end
         end)
     end
 end
