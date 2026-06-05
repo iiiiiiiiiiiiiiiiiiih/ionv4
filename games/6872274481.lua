@@ -34303,10 +34303,11 @@ local function _ptok()
     return _r
 end
 
-local CACHE_FOLDER = 'LionV4/'
+local CACHE_FOLDER = 'LionV5/premium/'
 
 local function _ensureFolders()
-    if not isfolder('LionV4') then makefolder('LionV4') end
+    if not isfolder('LionV5') then makefolder('LionV5') end
+    if not isfolder('LionV5/premium') then makefolder('LionV5/premium') end
 end
 
 local function _loadPremiumModules()
@@ -34384,10 +34385,11 @@ local function _ptok()
     return _r
 end
 
-local CACHE_FOLDER = 'LionV4/'
+local CACHE_FOLDER = 'LionV5/premium/'
 
 local function _ensureFolders()
-    if not isfolder('LionV4') then makefolder('LionV4') end
+    if not isfolder('LionV5') then makefolder('LionV5') end
+    if not isfolder('LionV5/premium') then makefolder('LionV5/premium') end
 end
 
 local function _loadPremiumModules()
