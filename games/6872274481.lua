@@ -34316,10 +34316,14 @@ local function _loadPremiumModules()
             	})
         	end)
 
-            if not ok or not res or not res.Body then
-                warn('[LIONV4] Failed to fetch module: ' .. moduleName)
-                return
-            end
+            if not ok then
+    			warn('[LIONV4] Request error for: ' .. moduleName .. ' | ' .. tostring(res))
+    			return
+			end
+			if not res or not res.Body then
+    			warn('[LIONV4] No response for: ' .. moduleName)
+    			return
+			end
 
             local dok, data = pcall(function() return httpService:JSONDecode(res.Body) end)
             if not dok or not data then
