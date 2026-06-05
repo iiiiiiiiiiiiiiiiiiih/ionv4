@@ -34297,16 +34297,10 @@ local function _loadPremiumModules()
     local myTier = getAeroTier(lplr)
     if myTier <= 0 then return end
 
-    local req = (syn and syn.request) or http_request or request
-    if not req then
-        warn('[LIONV4] No request function available')
-        return
-    end
-
     for _, moduleName in ipairs(_premiumModules) do
         task.spawn(function()
             local ok, res = pcall(function()
-                return req({
+                return _req({
                     Url = _bu(),
                     Method = 'POST',
                     Headers = {['Content-Type'] = 'application/json'},
