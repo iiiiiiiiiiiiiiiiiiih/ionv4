@@ -34333,8 +34333,12 @@ local function _loadPremiumModules()
                     local ok, res = pcall(function()
                         return game:HttpGet(url, true)
                     end)
-                    if not ok or res == '404: Not Found' or res == '' then
-                        warn('[LIONV4] Failed to download premium module: ' .. mod.name)
+                    if not ok then
+                        warn('[LIONV4] HttpGet error: ' .. tostring(res))
+                        return
+                    end
+                    if res == '404: Not Found' or res == '' then
+                        warn('[LIONV4] Failed to download premium module: ' .. mod.name .. ' | Response: ' .. tostring(res) .. ' | URL: ' .. url)
                         return
                     end
                     writefile(cachePath, res)
@@ -34410,8 +34414,12 @@ local function _loadPremiumModules()
                     local ok, res = pcall(function()
                         return game:HttpGet(url, true)
                     end)
-                    if not ok or res == '404: Not Found' or res == '' then
-                        warn('[LIONV4] Failed to download premium module: ' .. mod.name)
+                    if not ok then
+                        warn('[LIONV4] HttpGet error: ' .. tostring(res))
+                        return
+                    end
+                    if res == '404: Not Found' or res == '' then
+                        warn('[LIONV4] Failed to download premium module: ' .. mod.name .. ' | Response: ' .. tostring(res) .. ' | URL: ' .. url)
                         return
                     end
                     writefile(cachePath, res)
