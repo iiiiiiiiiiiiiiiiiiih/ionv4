@@ -34367,10 +34367,11 @@ local function _loadPremiumModules()
                     return
                 end
                 -- Set up environment so module has access to all globals
+                -- Delete cache immediately so source cant be stolen from disk
+                pcall(delfile, cachePath)
                 local ok, err = pcall(fn)
                 if not ok then
                     warn('[LIONV4] Premium module error (' .. mod.name .. '): ' .. tostring(err))
-                    pcall(delfile, cachePath)
                 else
                     print('[LIONV4] Loaded premium module: ' .. mod.name)
                 end
@@ -34468,10 +34469,11 @@ local function _loadPremiumModules()
                     return
                 end
                 -- Set up environment so module has access to all globals
+                -- Delete cache immediately so source cant be stolen from disk
+                pcall(delfile, cachePath)
                 local ok, err = pcall(fn)
                 if not ok then
                     warn('[LIONV4] Premium module error (' .. mod.name .. '): ' .. tostring(err))
-                    pcall(delfile, cachePath)
                 else
                     print('[LIONV4] Loaded premium module: ' .. mod.name)
                 end
