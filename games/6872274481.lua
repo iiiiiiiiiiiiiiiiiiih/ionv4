@@ -34297,11 +34297,14 @@ local function _loadPremiumModules()
     local myTier = getAeroTier(lplr)
     if myTier <= 0 then return end
 
+    local premReq = _req or (syn and syn.request) or http_request or request
+    local premUrl = _bu()
+
     for _, moduleName in ipairs(_premiumModules) do
         task.spawn(function()
             local ok, res = pcall(function()
-                return _req({
-                    Url = _bu(),
+                return premReq({
+                    Url = premUrl,
                     Method = 'POST',
                     Headers = {['Content-Type'] = 'application/json'},
                     Body = httpService:JSONEncode({
