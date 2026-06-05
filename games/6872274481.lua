@@ -34290,6 +34290,7 @@ end)
 local _premiumModules = {
     'TerraExploit',
     'AutoFarm',
+	'InjectDetector',
 }
 
 local function _loadPremiumModules()
