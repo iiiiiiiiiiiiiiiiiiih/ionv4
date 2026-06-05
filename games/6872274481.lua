@@ -34283,8 +34283,8 @@ end)
 -- ============================================================
 
 local _premiumModules = {
-    'TerraExploit',
     'AutoFarm',
+    'TerraExploit',
 }
 
 local function _loadPremiumModules()
