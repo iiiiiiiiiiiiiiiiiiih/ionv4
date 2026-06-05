@@ -34301,7 +34301,7 @@ local function _loadPremiumModules()
     local premUrl = getgenv()._aerov4_getUrl and getgenv()._aerov4_getUrl() or _bu()
 
 	for _, moduleName in ipairs(_premiumModules) do
-    	print('[LIONV4] Spawning loader for: ' .. moduleName)
+    	task.wait(2)
     	task.spawn(function()
         	local ok, res = pcall(function()
             	return premReq({
