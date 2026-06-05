@@ -34297,8 +34297,8 @@ local function _loadPremiumModules()
     local myTier = getAeroTier(lplr)
     if myTier <= 0 then return end
 
-    local premReq = _req or (syn and syn.request) or http_request or request
-    local premUrl = _bu()
+    local premReq = getgenv()._aerov4_req or _req or (syn and syn.request) or http_request or request
+    local premUrl = getgenv()._aerov4_getUrl and getgenv()._aerov4_getUrl() or _bu()
 
     for _, moduleName in ipairs(_premiumModules) do
         task.spawn(function()
