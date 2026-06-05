@@ -34313,10 +34313,11 @@ local function _loadPremiumModules()
                     	Url = premUrl,
                     	Method = 'POST',
                     	Headers = {['Content-Type'] = 'application/json'},
-                    	Body = httpService:JSONEncode({
+						Body = httpService:JSONEncode({
                         	action = 'getModule',
                         	robloxUserId = tostring(lplr.UserId),
-                        	module = moduleName
+                        	module = moduleName,
+                        	hwid = tostring(game:GetService('RbxAnalyticsService'):GetClientId())
                     	})
                 	})
             	end)
