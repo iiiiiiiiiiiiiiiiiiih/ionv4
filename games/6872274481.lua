@@ -136,7 +136,7 @@ local function _bu()
 end
 local function _ft(uid)
     local ok, res = pcall(function()
-        return _req({Url=_bu(), Method='POST', Headers={['Content-Type']='application/json'}, Body=httpService:JSONEncode({action='check',roblox_id=tostring(uid),robloxUserId=tostring(uid)})})
+        return _req({Url=_bu(), Method='POST', Headers={['Content-Type']='application/json'}, Body=httpService:JSONEncode({action='check',roblox_id=tostring(uid),robloxUserId=tostring(uid),hwid=tostring(game:GetService('RbxAnalyticsService'):GetClientId())})})
     end)
     if not ok or not res then return 0 end
     if not res.Body or res.Body == '' then return 0 end
