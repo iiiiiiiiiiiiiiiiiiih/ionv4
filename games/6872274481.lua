@@ -34303,18 +34303,23 @@ local function _loadPremiumModules()
 	for _, moduleName in ipairs(_premiumModules) do
     	task.wait(2)
     	task.spawn(function()
-        	local ok, res = pcall(function()
-            	return premReq({
-                	Url = premUrl,
-                	Method = 'POST',
-                	Headers = {['Content-Type'] = 'application/json'},
-                	Body = httpService:JSONEncode({
-                    	action = 'getModule',
-                    	robloxUserId = tostring(lplr.UserId),
-                    	module = moduleName
+    		local ok, res
+    		for attempt = 1, 3 do
+    			ok, res = pcall(function()
+                	return premReq({
+                    	Url = premUrl,
+                    	Method = 'POST',
+                    	Headers = {['Content-Type'] = 'application/json'},
+                    	Body = httpService:JSONEncode({
+                        	action = 'getModule',
+                        	robloxUserId = tostring(lplr.UserId),
+                        	module = moduleName
+                    	})
                 	})
-            	})
-        	end)
+            	end)
+            	if ok and res and res.Body then break end
+            	task.wait(3)
+        	end
 
             if not ok then
     			warn('[LIONV4] Request error for: ' .. moduleName .. ' | ' .. tostring(res))
