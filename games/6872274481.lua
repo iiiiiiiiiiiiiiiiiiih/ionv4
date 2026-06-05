@@ -34304,7 +34304,7 @@ local function _loadPremiumModules()
     	task.wait(2)
     	task.spawn(function()
     		local ok, res
-    		for attempt = 1, 3 do
+    		for attempt = 1, 5 do
     			ok, res = pcall(function()
                 	return premReq({
                     	Url = premUrl,
@@ -34318,7 +34318,8 @@ local function _loadPremiumModules()
                 	})
             	end)
             	if ok and res and res.Body then break end
-            	task.wait(3)
+            	warn('[LIONV4] Retry '..attempt..' for: '..moduleName)
+            	task.wait(5)
         	end
 
             if not ok then
