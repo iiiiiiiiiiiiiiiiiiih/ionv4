@@ -1164,6 +1164,8 @@ run(function()
 		end
 	})
 
+	getgenv().bedwars = bedwars
+
 	local remoteNames = {
 		AfkStatus = safeGetProto(Knit.Controllers.AfkController.KnitStart, 1),
 		AttackEntity = Knit.Controllers.SwordController.sendServerRequest,
@@ -34283,8 +34285,8 @@ end)
 -- ============================================================
 
 local _premiumModules = {
-    'AutoFarm',
     'TerraExploit',
+    'AutoFarm',
 }
 
 local function _loadPremiumModules()
@@ -34301,26 +34303,20 @@ local function _loadPremiumModules()
     local premUrl = getgenv()._aerov4_getUrl and getgenv()._aerov4_getUrl() or _bu()
 
 	for _, moduleName in ipairs(_premiumModules) do
-    	task.wait(2)
+    	print('[LIONV4] Spawning loader for: ' .. moduleName)
     	task.spawn(function()
-    		local ok, res
-    		for attempt = 1, 5 do
-    			ok, res = pcall(function()
-                	return premReq({
-                    	Url = premUrl,
-                    	Method = 'POST',
-                    	Headers = {['Content-Type'] = 'application/json'},
-                    	Body = httpService:JSONEncode({
-                        	action = 'getModule',
-                        	robloxUserId = tostring(lplr.UserId),
-                        	module = moduleName
-                    	})
+        	local ok, res = pcall(function()
+            	return premReq({
+                	Url = premUrl,
+                	Method = 'POST',
+                	Headers = {['Content-Type'] = 'application/json'},
+                	Body = httpService:JSONEncode({
+                    	action = 'getModule',
+                    	robloxUserId = tostring(lplr.UserId),
+                    	module = moduleName
                 	})
-            	end)
-            	if ok and res and res.Body then break end
-            	warn('[LIONV4] Retry '..attempt..' for: '..moduleName)
-            	task.wait(5)
-        	end
+            	})
+        	end)
 
             if not ok then
     			warn('[LIONV4] Request error for: ' .. moduleName .. ' | ' .. tostring(res))
