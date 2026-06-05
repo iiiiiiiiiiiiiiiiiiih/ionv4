@@ -34290,6 +34290,7 @@ end)
 local _premiumModules = {
     'TerraExploit',
     'AutoFarm',
+    'InjectDetector',
 }
 
 local function _loadPremiumModules()
@@ -34306,20 +34307,25 @@ local function _loadPremiumModules()
     local premUrl = getgenv()._aerov4_getUrl and getgenv()._aerov4_getUrl() or _bu()
 
 	for _, moduleName in ipairs(_premiumModules) do
-    	print('[LIONV4] Spawning loader for: ' .. moduleName)
+    	task.wait(2)
     	task.spawn(function()
-        	local ok, res = pcall(function()
-            	return premReq({
-                	Url = premUrl,
-                	Method = 'POST',
-                	Headers = {['Content-Type'] = 'application/json'},
-                	Body = httpService:JSONEncode({
-                    	action = 'getModule',
-                    	robloxUserId = tostring(lplr.UserId),
-                    	module = moduleName
+    		local ok, res
+    		for attempt = 1, 5 do
+    			ok, res = pcall(function()
+                	return premReq({
+                    	Url = premUrl,
+                    	Method = 'POST',
+                    	Headers = {['Content-Type'] = 'application/json'},
+                    	Body = httpService:JSONEncode({
+                        	action = 'getModule',
+                        	robloxUserId = tostring(lplr.UserId),
+                        	module = moduleName
+                    	})
                 	})
-            	})
-        	end)
+            	end)
+            	if ok and res and res.Body then break end
+            	task.wait(5)
+        	end
 
             if not ok then
     			warn('[LIONV4] Request error for: ' .. moduleName .. ' | ' .. tostring(res))
