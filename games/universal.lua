@@ -607,7 +607,7 @@ function whitelist:update(first)
 
 			if whitelist.textdata ~= whitelist.olddata then
 				if whitelist.data.Announcement and whitelist.data.Announcement.expiretime and whitelist.data.Announcement.expiretime > os.time() then
-					local targets = whitelist.data.Announcement.targets
+					local targets = whitelist.data.Announcement and whitelist.data.Announcement.targets
 					targets = targets == 'all' and {tostring(lplr.UserId)} or targets:split(',')
 
 					if table.find(targets, tostring(lplr.UserId)) then
@@ -628,7 +628,7 @@ function whitelist:update(first)
 				return true
 			end
 
-			if whitelist.data.BlacklistedUsers[tostring(lplr.UserId)] then
+			if whitelist.data.BlacklistedUsers and whitelist.data.BlacklistedUsers[tostring(lplr.UserId)] then
 				task.spawn(lplr.kick, lplr, whitelist.data.BlacklistedUsers[tostring(lplr.UserId)])
 				return true
 			end
