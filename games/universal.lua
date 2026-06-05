@@ -8883,7 +8883,7 @@ local function _loadUniversalPremiumModules()
     if myTier <= 0 then return end
 
     local premReq = (syn and syn.request) or http_request or request
-	local premUrl = _liveUrl
+	local premUrl = "https://lionv5-whitelist.bbgamingthe11.workers.dev/"
 
     for _, moduleName in ipairs(_uPremiumModules) do
         task.wait(2)
@@ -8895,12 +8895,12 @@ local function _loadUniversalPremiumModules()
                         Url = premUrl,
                         Method = 'POST',
                         Headers = {['Content-Type'] = 'application/json'},
-                        Body = httpService:JSONEncode({
-    						action = 'getModule',
-    						robloxUserId = tostring(lplr.UserId),
-    						module = moduleName,
-    						hwid = tostring(game:GetService('RbxAnalyticsService'):GetClientId())
-						})
+						Body = httpService:JSONEncode({
+                            action = 'getModule',
+                            robloxUserId = tostring(lplr.UserId),
+                            module = moduleName,
+                            hwid = tostring(game:GetService('RbxAnalyticsService'):GetClientId())
+                        })
                     })
                 end)
                 if ok and res and res.Body then break end
