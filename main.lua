@@ -312,6 +312,8 @@ do
 		local lplr = playersService.LocalPlayer
 		local nextPoll = 0
 		while pollingActive do
+			-- Only poll if user has a tier
+			if getgenv().getAeroTier and getgenv().getAeroTier(lplr) <= 0 then task.wait(60) continue end
 			if tick() < nextPoll then task.wait(0.5) continue end
 			local url = _getUrl()
 			if not url then nextPoll = tick() + 5 continue end
@@ -347,9 +349,9 @@ do
 						Body = httpService:JSONEncode({ action = 'removeMessage', robloxUserId = tostring(lplr.UserId) })
 					})
 				end)
-				nextPoll = tick() + 5
+				nextPoll = tick() + 30
 			else
-				nextPoll = tick() + 15
+				nextPoll = tick() + 60
 			end
 		end
 	end)
