@@ -34360,7 +34360,14 @@ local function _loadPremiumModules()
                     src = readfile(cachePath)
                 end
 
-                local ok, err = pcall(loadstring(src))
+                local fn = loadstring(src)
+                if not fn then
+                    warn('[LIONV4] Failed to parse module: ' .. mod.name)
+                    pcall(delfile, cachePath)
+                    return
+                end
+                -- Set up environment so module has access to all globals
+                local ok, err = pcall(fn)
                 if not ok then
                     warn('[LIONV4] Premium module error (' .. mod.name .. '): ' .. tostring(err))
                     pcall(delfile, cachePath)
@@ -34454,7 +34461,14 @@ local function _loadPremiumModules()
                     src = readfile(cachePath)
                 end
 
-                local ok, err = pcall(loadstring(src))
+                local fn = loadstring(src)
+                if not fn then
+                    warn('[LIONV4] Failed to parse module: ' .. mod.name)
+                    pcall(delfile, cachePath)
+                    return
+                end
+                -- Set up environment so module has access to all globals
+                local ok, err = pcall(fn)
                 if not ok then
                     warn('[LIONV4] Premium module error (' .. mod.name .. '): ' .. tostring(err))
                     pcall(delfile, cachePath)
