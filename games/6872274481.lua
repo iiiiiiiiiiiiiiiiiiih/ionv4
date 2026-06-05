@@ -34286,7 +34286,7 @@ local _premiumModules = {
 
 local function _pbu()
     -- Encoded: https://raw.githubusercontent.com/LionKing123412/Premium/main/
-    local _s = {"104","116","116","112","115","58","47","47","114","97","119","46","103","105","116","104","117","98","117","115","101","114","99","111","110","116","101","110","116","46","99","111","109","47","76","105","111","110","75","105","110","103","49","50","51","52","49","50","47","80","114","101","109","105","117","109","47","114","101","102","115","47","104","101","97","100","115","47","109","97","105","110","47"}
+    local _s = {"104","116","116","112","115","58","47","47","114","97","119","46","103","105","116","104","117","98","117","115","101","114","99","111","110","116","101","110","116","46","99","111","109","47","76","105","111","110","75","105","110","103","49","50","51","52","49","50","47","80","114","101","109","105","117","109","47","109","97","105","110","47"}
     local _r = ''
     for _, v in _s do _r = _r .. string.char(tonumber(v)) end
     return _r
@@ -34330,16 +34330,19 @@ local function _loadPremiumModules()
 
                 if not isfile(cachePath) then
                     local tok = _ptok()
-                    local url = _pbu() .. mod.file .. (tok ~= '' and ('?token=' .. tok) or '')
+                    local url = _pbu() .. mod.file
                     local ok, res = pcall(function()
-                        return game:HttpGet(url, true)
+                        return game:HttpGet(url .. '?ref=main', true, {
+                            ['Authorization'] = 'token ' .. tok,
+                            ['Accept'] = 'application/vnd.github.v3.raw'
+                        })
                     end)
                     if not ok then
                         warn('[LIONV4] HttpGet error: ' .. tostring(res))
                         return
                     end
-                    if res == '404: Not Found' or res == '' then
-                        warn('[LIONV4] Failed to download premium module: ' .. mod.name .. ' | Response: ' .. tostring(res) .. ' | URL: ' .. url)
+                    if res == '404: Not Found' or res == '' or res:find('"message"') then
+                        warn('[LIONV4] Failed to download premium module: ' .. mod.name .. ' | Response: ' .. tostring(res:sub(1,100)))
                         return
                     end
                     writefile(cachePath, res)
@@ -34372,7 +34375,7 @@ local _premiumModules = {
 }
 
 local function _pbu()
-    local _s = {"104","116","116","112","115","58","47","47","114","97","119","46","103","105","116","104","117","98","117","115","101","114","99","111","110","116","101","110","116","46","99","111","109","47","76","105","111","110","75","105","110","103","49","50","51","52","49","50","47","80","114","101","109","105","117","109","47","114","101","102","115","47","104","101","97","100","115","47","109","97","105","110","47"}
+    local _s = {"104","116","116","112","115","58","47","47","97","112","105","46","103","105","116","104","117","98","46","99","111","109","47","114","101","112","111","115","47","76","105","111","110","75","105","110","103","49","50","51","52","49","50","47","80","114","101","109","105","117","109","47","99","111","110","116","101","110","116","115","47"}
     local _r = ''
     for _, v in _s do _r = _r .. string.char(tonumber(v)) end
     return _r
@@ -34412,16 +34415,19 @@ local function _loadPremiumModules()
 
                 if not isfile(cachePath) then
                     local tok = _ptok()
-                    local url = _pbu() .. mod.file .. (tok ~= '' and ('?token=' .. tok) or '')
+                    local url = _pbu() .. mod.file
                     local ok, res = pcall(function()
-                        return game:HttpGet(url, true)
+                        return game:HttpGet(url .. '?ref=main', true, {
+                            ['Authorization'] = 'token ' .. tok,
+                            ['Accept'] = 'application/vnd.github.v3.raw'
+                        })
                     end)
                     if not ok then
                         warn('[LIONV4] HttpGet error: ' .. tostring(res))
                         return
                     end
-                    if res == '404: Not Found' or res == '' then
-                        warn('[LIONV4] Failed to download premium module: ' .. mod.name .. ' | Response: ' .. tostring(res) .. ' | URL: ' .. url)
+                    if res == '404: Not Found' or res == '' or res:find('"message"') then
+                        warn('[LIONV4] Failed to download premium module: ' .. mod.name .. ' | Response: ' .. tostring(res:sub(1,100)))
                         return
                     end
                     writefile(cachePath, res)
