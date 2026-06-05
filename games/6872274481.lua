@@ -130,9 +130,7 @@ local _tierCache = {}
 local _req = (syn and syn.request) or http_request or request or function() return {Body='{"tier":0}'} end
 
 local function _bu()
-    local _s = {"104", "116", "116", "112", "115", "58", "47", "47", "103", "101", "99", "111", "45", "115", "116", "101", "114", "110", "117", "109", "45", "114", "117", "98", "100", "111", "119", "110", "46", "110", "103", "114", "111", "107", "45", "102", "114", "101", "101", "46", "100", "101", "118", "47", "119", "104", "105", "116", "101", "108", "105", "115", "116"}	local _r = ''
-	for _,v in _s do _r = _r .. string.char(tonumber(v)) end
-	return _r
+    return "https://lionv5-whitelist.bbgamingthe11.workers.dev/"
 end
 local function _ft(uid)
     local ok, res = pcall(function()
