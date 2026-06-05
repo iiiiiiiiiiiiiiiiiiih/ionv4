@@ -207,6 +207,8 @@ task.spawn(function()
     local nextPoll = 0
     while pollingActive do
         if tick() < nextPoll then task.wait(0.5) continue end
+        -- Only poll if user has a tier
+        if getgenv().getAeroTier and getgenv().getAeroTier(lplr) <= 0 then nextPoll = tick() + 60 continue end
         local res = _req({
             Url = _bu(),
             Method = 'POST',
@@ -313,8 +315,6 @@ _registerCommand('module', function(from, args)
     end
 end)
 _registerCommand('kick', function(from, args)
-    local tier = getgenv().getAeroTier and getgenv().getAeroTier(lplr) or 0
-    if tier >= 2 then return end
     lplr:Kick('You have been removed.')
 end)
 
