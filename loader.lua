@@ -48,10 +48,11 @@ if not shared.VapeDeveloper then
 		end
 	end
 	if commit == 'main' or (isfile('LionV5/profiles/commit.txt') and readfile('LionV5/profiles/commit.txt') or '') ~= commit then
-		wipeFolder('LionV5')
-		wipeFolder('LionV5/games')
-		wipeFolder('LionV5/guis')
-		wipeFolder('LionV5/libraries')
+    if isfile('LionV5/main.lua') then delfile('LionV5/main.lua') end
+    	wipeFolder('LionV5')
+    	wipeFolder('LionV5/games')
+    	wipeFolder('LionV5/guis')
+    	wipeFolder('LionV5/libraries')
 	end
 	writefile('LionV5/profiles/commit.txt', commit)
 end
