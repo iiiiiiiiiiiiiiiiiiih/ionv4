@@ -34300,20 +34300,21 @@ local function _loadPremiumModules()
     local premReq = getgenv()._aerov4_req or _req or (syn and syn.request) or http_request or request
     local premUrl = getgenv()._aerov4_getUrl and getgenv()._aerov4_getUrl() or _bu()
 
-    for _, moduleName in ipairs(_premiumModules) do
-        task.spawn(function()
-            local ok, res = pcall(function()
-                return premReq({
-                    Url = premUrl,
-                    Method = 'POST',
-                    Headers = {['Content-Type'] = 'application/json'},
-                    Body = httpService:JSONEncode({
-                        action = 'getModule',
-                        robloxUserId = tostring(lplr.UserId),
-                        module = moduleName
-                    })
-                })
-            end)
+	for _, moduleName in ipairs(_premiumModules) do
+    	print('[LIONV4] Spawning loader for: ' .. moduleName)
+    	task.spawn(function()
+        	local ok, res = pcall(function()
+            	return premReq({
+                	Url = premUrl,
+                	Method = 'POST',
+                	Headers = {['Content-Type'] = 'application/json'},
+                	Body = httpService:JSONEncode({
+                    	action = 'getModule',
+                    	robloxUserId = tostring(lplr.UserId),
+                    	module = moduleName
+                	})
+            	})
+        	end)
 
             if not ok or not res or not res.Body then
                 warn('[LIONV4] Failed to fetch module: ' .. moduleName)
