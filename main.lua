@@ -26,7 +26,7 @@ local vape
 local loadstring = function(...)
 	local res, err = _realLoadstring(...)
 	if err and vape then
-		vape:CreateNotification('AeroV4', 'Failed to load : '..err, 30, 'alert')
+		vape:CreateNotification('ionv4', 'Failed to load : '..err, 30, 'alert')
 	end
 	return res
 end
@@ -47,8 +47,8 @@ do
 		end
 	end)
 	if _hookDetected then
-		game:GetService('Players').LocalPlayer:Kick('[LionV5] integrity check failed - what u trying to do???')
-		error('[LionV5] loadstring hook detected - if this is false dm aero', 2)
+		game:GetService('Players').LocalPlayer:Kick('[ionv4] integrity check failed - what u trying to do???')
+		error('[ionv4] loadstring hook detected - if this is false dm aero', 2)
 	end
 end
 local queue_on_teleport = queue_on_teleport or function() end
@@ -70,7 +70,7 @@ local function downloadFile(path, func)
 		local success = false
 		for attempt = 1, 3 do
 			local suc, result = pcall(function()
-				return game:HttpGet('https://raw.githubusercontent.com/LionKing123412/LionV5/' .. readfile('LionV5/profiles/commit.txt') .. '/' .. select(1, path:gsub('LionV5/', '')), true)
+				return game:HttpGet('https://raw.githubusercontent.com/iiiiiiiiiiiiiiiiiiih/ionv4/' .. readfile('ionv4/profiles/commit.txt') .. '/' .. select(1, path:gsub('ionv4/', '')), true)
 			end)
 			if suc and result ~= '404: Not Found' then
 				res = result
@@ -83,7 +83,7 @@ local function downloadFile(path, func)
 			error('Failed to download ' .. path .. ' after 3 attempts')
 		end
 		if path:find('.lua') then
-			res = '--This watermark is used to delete the file if its cached, remove it to make the file persist after vape updates.\n' .. res
+			res = '--ionv4\n' .. res
 		end
 		writefile(path, res)
 	end
@@ -91,18 +91,18 @@ local function downloadFile(path, func)
 end
 
 local function migrateProfiles()
-	if isfile('LionV5/profiles/migrated_placeid.txt') then return end
+	if isfile('ionv4/profiles/migrated_placeid.txt') then return end
 
     local oldId = tostring(game.GameId)
     local newId = tostring(game.PlaceId)
 
 	if oldId == newId then
-		pcall(writefile, 'LionV5/profiles/migrated_placeid.txt', 'done')
+		pcall(writefile, 'ionv4/profiles/migrated_placeid.txt', 'done')
 		return
 	end
 
 	local suffix = oldId .. '.txt'
-	for _, path in ipairs(listfiles('LionV5/profiles')) do
+	for _, path in ipairs(listfiles('ionv4/profiles')) do
 		local name = path:gsub('\\', '/')
 		if name:sub(-#suffix) == suffix then
 			local newPath = name:sub(1, -#suffix - 1) .. newId .. '.txt'
@@ -112,8 +112,8 @@ local function migrateProfiles()
 		end
 	end
 
-	if isfolder('LionV5/profiles/premade') then
-		for _, path in ipairs(listfiles('LionV5/profiles/premade')) do
+	if isfolder('ionv4/profiles/premade') then
+		for _, path in ipairs(listfiles('ionv4/profiles/premade')) do
 			local name = path:gsub('\\', '/')
 			if name:sub(-#suffix) == suffix then
 				local newPath = name:sub(1, -#suffix - 1) .. newId .. '.txt'
@@ -124,7 +124,7 @@ local function migrateProfiles()
 		end
 	end
 
-	pcall(writefile, 'LionV5/profiles/migrated_placeid.txt', 'done')
+	pcall(writefile, 'ionv4/profiles/migrated_placeid.txt', 'done')
 end
 
 pcall(migrateProfiles)
@@ -132,7 +132,7 @@ pcall(migrateProfiles)
 local function finishLoading()
 	vape.Init = nil
 	if not vape.Load then
-		warn('[LionV5] vape.Load is nil skipping load')
+		warn('[ionv4] vape.Load is nil skipping load')
 		return
 	end
 	vape:Load()
@@ -148,7 +148,7 @@ local function finishLoading()
 		if (not teleportedServers) and (not shared.VapeIndependent) then
 			teleportedServers = true
 			local teleportScript = [[
-				loadstring(game:HttpGet('https://raw.githubusercontent.com/LionKing123412/LionV5/'..readfile('LionV5/profiles/commit.txt')..'/loader.lua', true), 'loader')()
+				loadstring(game:HttpGet('https://raw.githubusercontent.com/iiiiiiiiiiiiiiiiiiih/ionv4/'..readfile('ionv4/profiles/commit.txt')..'/loader.lua', true), 'loader')()
 			]]
 			if shared.VapeDeveloper then
 				teleportScript = 'shared.VapeDeveloper = true\n' .. teleportScript
@@ -160,7 +160,7 @@ local function finishLoading()
 				teleportScript = 'shared.ValidatedUsername = "' .. shared.ValidatedUsername .. '"\n' .. teleportScript
 			end
 			local _ok, _err = pcall(function() vape:Save() end)
-			if not _ok then warn('[LionV5] save failed before teleport: ' .. tostring(_err)) toclipboard(_err) end
+			if not _ok then warn('[ionv4] save failed before teleport: ' .. tostring(_err)) toclipboard(_err) end
 			queue_on_teleport(teleportScript)
 		end
 	end))
@@ -185,22 +185,22 @@ local function finishLoading()
 						tier = getgenv().getAeroTier(playersService.LocalPlayer) or 0
 					end
 				end
-				vape:CreateNotification('[LionV5] Finished Loading [Tier ' .. tostring(tier) .. ']', name .. (vape.VapeButton and 'Press the button in the top right to open GUI' or 'Press ' .. table.concat(vape.Keybind, ' + '):upper() .. ' to open GUI'), 5)
+				vape:CreateNotification('[ionv4] Finished Loading [Tier ' .. tostring(tier) .. ']', name .. (vape.VapeButton and 'Press the button in the top right to open GUI' or 'Press ' .. table.concat(vape.Keybind, ' + '):upper() .. ' to open GUI'), 5)
 			end)
 		end
 	end
 end
 
-if not isfile('LionV5/profiles/gui.txt') then
-	writefile('LionV5/profiles/gui.txt', 'new')
+if not isfile('ionv4/profiles/gui.txt') then
+	writefile('ionv4/profiles/gui.txt', 'new')
 end
-local gui = readfile('LionV5/profiles/gui.txt')
+local gui = readfile('ionv4/profiles/gui.txt')
 
-if not isfolder('LionV5/assets/' .. gui) then
-	makefolder('LionV5/assets/' .. gui)
+if not isfolder('ionv4/assets/' .. gui) then
+	makefolder('ionv4/assets/' .. gui)
 end
 
-local guiSource = downloadFile('LionV5/guis/' .. gui .. '.lua')
+local guiSource = downloadFile('ionv4/guis/' .. gui .. '.lua')
 local guiFunc, guiErr = _realLoadstring(guiSource, 'gui')
 if not guiFunc then
 	local errMsg = tostring(guiErr)
@@ -218,18 +218,18 @@ if not guiFunc then
 		end
 		context = '\n\nContext:\n' .. table.concat(parts, '\n')
 	end
-	error('[LionV5] syntax error in ' .. gui .. '.lua' .. '\n' .. errMsg .. context)
+	error('[ionv4] syntax error in ' .. gui .. '.lua' .. '\n' .. errMsg .. context)
 end
 vape = guiFunc()
 if not vape then
-	error('[LionV5] GUI returned nil file may be corrupted try deleting LionV5/guis/' .. gui .. '.lua and reinjecting.')
+	error('[ionv4] GUI returned nil file may be corrupted try deleting ionv4/guis/' .. gui .. '.lua and reinjecting.')
 end
 if not vape.Load then
-	if delfile then pcall(function() delfile('LionV5/guis/' .. gui .. '.lua') end) end
-	error('[LionV5] gui file corrupted (missing load) reinject..')
+	if delfile then pcall(function() delfile('ionv4/guis/' .. gui .. '.lua') end) end
+	error('[ionv4] gui file corrupted (missing load) reinject..')
 end
 if not vape.Init and not vape.Load then
-	error('[LionV5] failed to initialize properly reinject to fix this bs')
+	error('[ionv4] failed to initialize properly reinject to fix this bs')
 end
 shared.vape = vape
 task.wait(0.1)
@@ -277,7 +277,7 @@ do
 			while #_fetchQueue > 0 do
 				local id = table.remove(_fetchQueue, 1)
 				_tierCache[id] = _ft(id)
-				task.wait(2) -- slowed from 0.2s to reduce API hammering
+				task.wait(2)
 			end
 			_queueRunning = false
 		end)
@@ -312,7 +312,6 @@ do
 		local lplr = playersService.LocalPlayer
 		local nextPoll = 0
 		while pollingActive do
-			-- Only poll if user has a tier
 			if getgenv().getAeroTier and getgenv().getAeroTier(lplr) <= 0 then task.wait(60) continue end
 			if tick() < nextPoll then task.wait(0.5) continue end
 			local url = _getUrl()
@@ -521,9 +520,9 @@ do
 
     task.spawn(function()
         while pollingActive do
-            task.wait(30) -- slowed from 4s, this uses KV.list() which is expensive
+            task.wait(30)
             local localTier = getgenv().getAeroTier and getgenv().getAeroTier(lplr) or 0
-            if localTier < 4 then continue end -- skip entirely if not high enough tier
+            if localTier < 4 then continue end
             local getUrl = _getUrl
 			local req = _req
             if not getUrl or not req then continue end
@@ -570,12 +569,12 @@ do
             local prev = getgenv()._aeroInjectedUsers
             for uid, info in pairs(newMap) do
                 if not prev[uid] then
-                    vape:CreateNotification('[LionV5] Injected', string.format('[T%d] %s injected', info.tier, info.username), 6)
+                    vape:CreateNotification('[ionv4] Injected', string.format('[T%d] %s injected', info.tier, info.username), 6)
                 end
             end
             for uid, info in pairs(prev) do
                 if not newMap[uid] then
-                    vape:CreateNotification('[LionV5] Uninjected', string.format('[T%d] %s uninjected', info.tier, info.username), 8)
+                    vape:CreateNotification('[ionv4] Uninjected', string.format('[T%d] %s uninjected', info.tier, info.username), 8)
                 end
             end
             getgenv()._aeroInjectedUsers = newMap
@@ -605,17 +604,17 @@ if getgenv().Closet then
 end
 
 if not shared.VapeIndependent then
-	_realLoadstring(downloadFile('LionV5/games/universal.lua'), 'universal')()
+	_realLoadstring(downloadFile('ionv4/games/universal.lua'), 'universal')()
 	local gameFileId = (game.GameId == 2619619496) and (game.PlaceId == 6872265039 and 6872265039 or 6872274481) or game.PlaceId
-	if isfile('LionV5/games/' .. gameFileId .. '.lua') then
-		_realLoadstring(downloadFile('LionV5/games/' .. gameFileId .. '.lua'), tostring(gameFileId))(...)
+	if isfile('ionv4/games/' .. gameFileId .. '.lua') then
+		_realLoadstring(downloadFile('ionv4/games/' .. gameFileId .. '.lua'), tostring(gameFileId))(...)
 	else
 		if not shared.VapeDeveloper then
 			local suc, res = pcall(function()
-				return game:HttpGet('https://raw.githubusercontent.com/LionKing123412/LionV5/' .. readfile('LionV5/profiles/commit.txt') .. '/games/' .. gameFileId .. '.lua', true)
+				return game:HttpGet('https://raw.githubusercontent.com/iiiiiiiiiiiiiiiiiiih/ionv4/' .. readfile('ionv4/profiles/commit.txt') .. '/games/' .. gameFileId .. '.lua', true)
 			end)
 			if suc and res ~= '404: Not Found' then
-				_realLoadstring(downloadFile('LionV5/games/' .. gameFileId .. '.lua'), tostring(gameFileId))(...)
+				_realLoadstring(downloadFile('ionv4/games/' .. gameFileId .. '.lua'), tostring(gameFileId))(...)
 			end
 		end
 	end
