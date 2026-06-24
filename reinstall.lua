@@ -1,6 +1,6 @@
-local folderToClean = "newvape"
+local folderToClean = "ionv4"
 local folderToKeep = "profiles"
-local reinstallUrl = "https://raw.githubusercontent.com/LionKing123412/LionV5/main/NewMainScript.lua"
+local reinstallUrl = "https://raw.githubusercontent.com/iiiiiiiiiiiiiiiiiiih/ionv4/main/loader.lua"
 local function deleteRecursive(path, keepPath)
     if path == keepPath then return end
     if isfolder and isfolder(path) then
@@ -27,6 +27,6 @@ for _, item in ipairs(listfiles(folderToClean)) do
         deleteRecursive(item, keepFullPath)
     end
 end
-print("loading aerov4...")
+print("loading ionv4...")
 task.wait(1) --no no crash dabo
 loadstring(game:HttpGet(reinstallUrl, true))()
