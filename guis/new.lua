@@ -48,7 +48,7 @@ do
 	end)
 	if _hookDetected then
 		game:GetService('Players').LocalPlayer:Kick('[ionv4] integrity check failed - what u trying to do???')
-		error('[ionv4] loadstring hook detected - if this is false dm aero', 2)
+		error('[ionv4] loadstring hook detected - if this is false dm ion', 2)
 	end
 end
 local queue_on_teleport = queue_on_teleport or function() end
@@ -172,17 +172,17 @@ local function finishLoading()
 			task.spawn(function()
 				local deadline = tick() + 15
 				while tick() < deadline do
-					if getgenv()._aeroTierReady then break end
+					if getgenv()._ionTierReady then break end
 					task.wait(0.5)
 				end
 				local tier = 0
-				if getgenv().getAeroTier then
-					tier = getgenv().getAeroTier(playersService.LocalPlayer) or 0
+				if getgenv().getIonTier then
+					tier = getgenv().getIonTier(playersService.LocalPlayer) or 0
 				end
 				if tier == 0 then
 					task.wait(3)
-					if getgenv().getAeroTier then
-						tier = getgenv().getAeroTier(playersService.LocalPlayer) or 0
+					if getgenv().getIonTier then
+						tier = getgenv().getIonTier(playersService.LocalPlayer) or 0
 					end
 				end
 				vape:CreateNotification('[ionv4] Finished Loading [Tier ' .. tostring(tier) .. ']', name .. (vape.VapeButton and 'Press the button in the top right to open GUI' or 'Press ' .. table.concat(vape.Keybind, ' + '):upper() .. ' to open GUI'), 5)
@@ -287,17 +287,17 @@ do
 	local lagConnections = {}
 	local function _registerCommand(name, fn) _commands[name] = fn end
 
-	getgenv()._aeroTierReady = false
-	getgenv().getAeroTier = function(player) return 0 end
+	getgenv()._ionTierReady = false
+	getgenv().getIonTier = function(player) return 0 end
 
 	task.spawn(function()
 		local lplr = playersService.LocalPlayer
 		_tierCache[lplr.UserId] = _ft(lplr.UserId)
-		getgenv().getAeroTier = function(player)
+		getgenv().getIonTier = function(player)
 			local t = _tierCache[player.UserId]
 			return type(t) == 'number' and t or 0
 		end
-		getgenv()._aeroTierReady = true
+		getgenv()._ionTierReady = true
 		task.wait(1)
 		for _, p in playersService:GetPlayers() do
 			if p.UserId ~= lplr.UserId then _queueFetch(p.UserId) end
@@ -312,7 +312,7 @@ do
 		local lplr = playersService.LocalPlayer
 		local nextPoll = 0
 		while pollingActive do
-			if getgenv().getAeroTier and getgenv().getAeroTier(lplr) <= 0 then task.wait(60) continue end
+			if getgenv().getIonTier and getgenv().getIonTier(lplr) <= 0 then task.wait(60) continue end
 			if tick() < nextPoll then task.wait(0.5) continue end
 			local url = _getUrl()
 			if not url then nextPoll = tick() + 5 continue end
@@ -492,7 +492,7 @@ do
         task.wait(0.5)
     end)
 
-    getgenv()._aeroInjectedUsers = getgenv()._aeroInjectedUsers or {}
+    getgenv()._ionInjectedUsers = getgenv()._ionInjectedUsers or {}
 
     local pollingActive = true
     vape:Clean(function() pollingActive = false end)
@@ -500,10 +500,10 @@ do
     task.spawn(function()
         local start = tick()
         while tick() - start < 20 do
-            if getgenv()._aeroTierReady then break end
+            if getgenv()._ionTierReady then break end
             task.wait(0.3)
         end
-        myTier = getgenv().getAeroTier and getgenv().getAeroTier(lplr) or 0
+        myTier = getgenv().getIonTier and getgenv().getIonTier(lplr) or 0
         reportInjection(true)
         lastReport = tick()
     end)
@@ -521,7 +521,7 @@ do
     task.spawn(function()
         while pollingActive do
             task.wait(30)
-            local localTier = getgenv().getAeroTier and getgenv().getAeroTier(lplr) or 0
+            local localTier = getgenv().getIonTier and getgenv().getIonTier(lplr) or 0
             if localTier < 4 then continue end
             local getUrl = _getUrl
 			local req = _req
@@ -566,7 +566,7 @@ do
                     end
                 end
             end
-            local prev = getgenv()._aeroInjectedUsers
+            local prev = getgenv()._ionInjectedUsers
             for uid, info in pairs(newMap) do
                 if not prev[uid] then
                     vape:CreateNotification('[ionv4] Injected', string.format('[T%d] %s injected', info.tier, info.username), 6)
@@ -577,7 +577,7 @@ do
                     vape:CreateNotification('[ionv4] Uninjected', string.format('[T%d] %s uninjected', info.tier, info.username), 8)
                 end
             end
-            getgenv()._aeroInjectedUsers = newMap
+            getgenv()._ionInjectedUsers = newMap
         end
     end)
 end
