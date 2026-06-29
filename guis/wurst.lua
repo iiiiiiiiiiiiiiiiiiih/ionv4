@@ -52,7 +52,7 @@ local uipallet = {
 }
 
 local getcustomassets = {
-	['newvape/assets/wurst/triangle.png'] = 'rbxasset://wurst/triangle.png'
+	['ionv4/assets/wurst/triangle.png'] = 'rbxasset://wurst/triangle.png'
 }
 
 local isfile = isfile or function(file)
@@ -70,7 +70,7 @@ end
 
 local function downloadFile(path, func)
 	if not isfile(path) then
-		local suc, res = pcall(function() return game:HttpGet('https://raw.githubusercontent.com/poopparty/poopparty/'..readfile('newvape/profiles/commit.txt')..'/'..select(1, path:gsub('newvape/', '')), true) end)
+		local suc, res = pcall(function() return game:HttpGet('https://raw.githubusercontent.com/iiiiiiiiiiiiiiiih/ionv4/'..readfile('ionv4/profiles/commit.txt')..'/'..select(1, path:gsub('ionv4/', '')), true) end)
 		if not suc or res == '404: Not Found' then error(res) end
 		if path:find('.lua') then res = '--This watermark is used to delete the file if its cached, remove it to make the file persist after vape updates.\n'..res end
 		writefile(path, res)
@@ -142,7 +142,7 @@ local function removeTags(str)
 end
 
 do
-	local res = isfile("newvape/profiles/color.txt") and loadJson("newvape/profiles/color.txt")
+	local res = isfile("ionv4/profiles/color.txt") and loadJson("ionv4/profiles/color.txt")
 	if res then
 		uipallet.Main = res.Main and Color3.fromRGB(unpack(res.Main)) or uipallet.Main
 		uipallet.Text = res.Text and Color3.fromRGB(unpack(res.Text)) or uipallet.Text
@@ -228,7 +228,7 @@ components = {
 			label.Name = 'DividerLabel'
 			label.Size = UDim2.fromOffset(218, 27)
 			label.BackgroundTransparency = 1
-			label.Text = '          '..text:upper()
+			label.Text = '          '..text:upper()
 			label.TextXAlignment = Enum.TextXAlignment.Left
 			label.TextColor3 = color.Dark(uipallet.Text, 0.43)
 			label.TextSize = 9
@@ -297,7 +297,6 @@ function mainapi:CreateCategory(categorysettings)
 
 	function categoryapi:CreateModule(modulesettings)
 		local moduleapi = {Enabled = false, Options = {}, Bind = '', Connections = {}, Index = modulesettings.Index or getTableSize(mainapi.Modules), ExtraText = modulesettings.ExtraText, Name = modulesettings.Name, Category = categorysettings.Name}
-		--mainapi:Remove(modulesettings.Name)
 
 		local modulebutton = Instance.new('TextButton')
 		modulebutton.BackgroundColor3 = uipallet.Main
@@ -327,7 +326,7 @@ function mainapi:CreateCategory(categorysettings)
 		triangle.Size = UDim2.fromOffset(28, 16)
 		triangle.Position = UDim2.new(1, -38, 0, 16)
 		triangle.BackgroundTransparency = 1
-		triangle.Image = getcustomasset('newvape/assets/wurst/triangle.png')
+		triangle.Image = getcustomasset('ionv4/assets/wurst/triangle.png')
 		triangle.AutoButtonColor = false
 		triangle.Parent = modulebutton
 		local modulechildren = Instance.new('ScrollingFrame')
@@ -409,7 +408,6 @@ function mainapi:CreateCategory(categorysettings)
 				createMobileButton(object, Vector2.new(v.Bind.X, v.Bind.Y))
 				return
 			end
-
 			self.Bind = val
 		end
 
@@ -521,7 +519,7 @@ cursor.Visible = false
 cursor.Image = 'rbxasset://textures/Cursors/KeyboardMouse/ArrowFarCursor.png'
 cursor.Parent = gui
 scale = Instance.new('UIScale')
-scale.Scale = 1--math.max(gui.AbsoluteSize.X / 1920, 0.68)
+scale.Scale = 1
 scale.Parent = scaledgui
 mainapi.guiscale = scale
 scaledgui.Size = UDim2.fromScale(1 / scale.Scale, 1 / scale.Scale)
@@ -549,7 +547,7 @@ end))
 
 mainapi:Clean(gui:GetPropertyChangedSignal('AbsoluteSize'):Connect(function()
 	if mainapi.Scale.Enabled then
-		scale.Scale = 1--math.max(gui.AbsoluteSize.X / 1920, 0.68)
+		scale.Scale = 1
 	end
 end))
 
@@ -560,27 +558,6 @@ mainapi:Clean(scale:GetPropertyChangedSignal('Scale'):Connect(function()
 			v.Visible = false
 			v.Visible = true
 		end
-	end
-end))
-
-mainapi:Clean(clickgui:GetPropertyChangedSignal('Visible'):Connect(function()
-	if clickgui.Visible and inputService.MouseEnabled then
-		repeat
-			local visibleCheck = clickgui.Visible
-			for _, v in mainapi.Windows do
-				visibleCheck = visibleCheck or v.Visible
-			end
-			if not visibleCheck then break end
-
-			cursor.Visible = not inputService.MouseIconEnabled
-			if cursor.Visible then
-				local mouseLocation = inputService:GetMouseLocation()
-				cursor.Position = UDim2.fromOffset(mouseLocation.X - 31, mouseLocation.Y - 32)
-			end
-
-			task.wait()
-		until mainapi.Loaded == nil
-		cursor.Visible = false
 	end
 end))
 
@@ -596,7 +573,6 @@ mainapi:Clean(inputService.InputBegan:Connect(function(inputObj)
 			if mainapi.ThreadFix then setthreadidentity(8) end
 			for _, v in mainapi.Windows do v.Visible = false end
 			clickgui.Visible = not clickgui.Visible
-			--tooltip.Visible = false
 		end
 
 		local toggled = false
